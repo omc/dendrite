@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dendrite is a log forwarding daemon.  Dendrite can continuously tail your logs, and emit a variety of formats, including json and statsd.
+Dendrite is a log forwarding daemon.  Dendrite can continuously tail both your application and system logs, and emit a variety of formats, including json and statsd.
 
 ## Why dendrite?
 
