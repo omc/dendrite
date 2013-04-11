@@ -24,7 +24,7 @@ Dendrite understands dates, numbers, counters, timings, searchable strings, fiel
 
 ### Configure dendrite, not every application.
 
-In the open-source world we live in, it's common for e.g. a rails app to be served by nginx, a rack server, a varnish cache, and rails itself.  Also you'll want slow query logs from your database and redis instance.  It's easy to paste the configs from the dendrite-cookbooks into /etc/dendrite/conf.d, reload dendrite, and be off and running.
+In the open-source world we live in, it's common for e.g. a rails app to be served by nginx, a rack server, a varnish cache, and rails itself.  Also you'll want slow query logs from your database and redis instance.  It's easy to paste the configs for each of these services from the dendrite-cookbooks into /etc/dendrite/conf.d, reload dendrite, and be off and running.
 
 ## Why not syslog?
 
