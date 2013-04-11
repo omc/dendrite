@@ -6,7 +6,7 @@ Dendrite is a log forwarding daemon.  Dendrite can continuously tail both your a
 
 ## Why dendrite?
 
-If you have a unified log stream, it's easy to have tools that consume, forward, and analyze your logs.  
+If you have a unified log stream, it's easy to have tools that consume, forward, and analyze your logs.  Currently, Dendrite speaks statd/graphite, and JSON over tcp/udp.
 
 ### Why not syslog?
 
