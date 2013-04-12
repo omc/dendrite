@@ -1,0 +1,26 @@
+# -- log line --
+# 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326
+# 
+# -- output --
+# {
+#   "host": "127.0.0.1", 
+#   "client": "-", 
+#   "user": "frank", 
+#   "time": 1349906136, 
+#   "method": "GET", 
+#   "uri": "/apache_pb.gif", 
+#   "status": 200, 
+#   "bytes": 2326
+# }
+sources:
+  apache_access_log:
+    glob: /var/log/apache2/access.log
+    pattern: (?P<host>\S+) (?P<client>\S+) (?P<user>\S+) \[(?P<time>[^\]]+)\] "(?P<method>[A-Z]+) (?P<uri>\S+).*" (?P<status>\S+) (?P<bytes>\S+)\n
+    fields:
+      bytes:
+        type: int
+      status:
+        type: int
+      time:
+        type: timestamp
+        format: 2/Jan/2006:15:04:05 -0700

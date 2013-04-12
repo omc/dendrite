@@ -1,0 +1,27 @@
+# -- log line --
+# INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1
+# 
+# -- output --
+# {
+#   "line": "INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1", 
+#   "severity": "INFO", 
+#   "core": "1234567898765", 
+#   "params": ["start", "0", "q", "*:*", "wt", "ruby", "fq", "type:User", "rows", "30"], 
+#   "hits": 3186235, 
+#   "status": 0,
+#   "qtime": 1
+# }
+sources:
+  apache_access_log:
+    glob: /var/log/tomcat6/catalina*log
+    pattern: (?P<line>(?P<severity>[A-Z]+): \[(?P<core>\w+)\].*?params=\{(?P<params>[^}]*)\}.*hits=(?P<hits>[0-9]+)?.*status=(?P<status>[0-9]+).*QTime=(?P<qtime>[0-9]+)).*\n
+    fields: 
+      params:
+        type: tokenized
+        pattern: [^&=]+
+      hits:
+        type: int
+      qtime: 
+        type: int
+      status:
+        type: int

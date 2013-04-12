@@ -1,0 +1,21 @@
+# -- log line --
+# [Wed Oct 11 14:32:52 2000] [error] [client 127.0.0.1] client denied by server configuration: /export/home/live/ap/htdocs/test
+# 
+# -- output --
+# {
+#   "time": 1349994772, 
+#   "severity": "error", 
+#   "ip": "127.0.0.1", 
+#   "message": ["client", "denied", "by", "server", "configuration", ": /", "export", "/", "home", "/", "live", "/", "ap", "/", "htdocs", "/", "test"]
+# }
+sources:
+  apache_error_log:
+    glob: /var/log/apache2/error.log
+    pattern: \[(?P<time>[^\]]+)\] \[(?P<severity>\S+)\] \[client (?P<ip>\S+)\] (?P<message>.*)\n
+    fields:
+      message:
+        type: tokenized
+        pattern: \S+\b
+      time:
+        type: timestamp
+        format: Mon Jan _2 15:04:05 2006
