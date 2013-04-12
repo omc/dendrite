@@ -131,15 +131,15 @@ func (config *Config) Populate(doc *yaml.File) {
 
 	root := doc.Root.(yaml.Map)
 
-	config.Address = root.Key("address").(yaml.Scalar).String()
-	config.OffsetDir = root.Key("offset_dir").(yaml.Scalar).String()
+  // config.Address = root.Key("address").(yaml.Scalar).String()
+  // config.OffsetDir = root.Key("offset_dir").(yaml.Scalar).String()
 
-	switch root.Key("encoder").(yaml.Scalar).String() {
-	case "json":
-		config.Encoder = new(JsonEncoder)
-	case "statsd":
-		config.Encoder = new(StatsdEncoder)
-	}
+  // switch root.Key("encoder").(yaml.Scalar).String() {
+  // case "json":
+  //  config.Encoder = new(JsonEncoder)
+  // case "statsd":
+  //  config.Encoder = new(StatsdEncoder)
+  // }
 
 	p, err := doc.Get(".protocol")
 	if err != nil {
