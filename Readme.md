@@ -100,5 +100,4 @@ Or for a destination conf.d yaml file:
         encoding: statsd
 
 
-Config files are yaml.  You can find a bunch of common config files in the cookbook directory.  
-
+Look in the cookbook directory for more examples.
