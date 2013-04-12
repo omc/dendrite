@@ -1,7 +1,13 @@
-address: /dev/stdout
-protocol: file
 offset_dir: /tmp
-encoder: json
+outputs:
+  console:
+    address: /dev/stdout
+    protocol: file
+    encoder: json
+  statsd:
+    address: localhost:2003
+    protocol: udp
+    encoder: statsd
 groups:
   syslog:
     glob: /var/log/system.log
