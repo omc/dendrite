@@ -6,7 +6,7 @@ Dendrite scrapes your existing logs (possibly including /var/log/syslog), and re
 
 ## Why dendrite?
 
-### Unified, structured logs are awesome
+### Unified, structured logs and metrics are awesome
 
 If you have a unified log stream, it's easy to have tools that consume, forward, and analyze your logs.
 
