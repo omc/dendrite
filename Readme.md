@@ -61,15 +61,15 @@ A typical conf.d yaml file looks like:
         # The output of the regexp can be post-processed.  This allows you
         # to specify type information, etc.
         #
-        # Current field types are string, date, tokenized, int, as well as
-        # gauge, timing, and metric.  The last few types are specialized 
-        # integers, and will be treated differently by statsd.
+        # Current field types are string, date, tokenized, int, timestamp,
+        # as well as gauge, timing, and metric.  The last few types are 
+        # specialized integers, and will be treated differently by statsd.
         fields:
-          timestamp:
+          # tstamp is the field name in the output.
+          tstamp:
+            # date is the name of the regex match group.
             name: date
-            # This will output a UNIX timestamp (seconds since epoch)
-            type: date
-            # see http://golang.org/pkg/time/#Parse
+            type: timestamp
             format: Jan _2 15:04:05
           line: 
             # you can match numbered subgroups, in addition to named ones.
