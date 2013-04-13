@@ -1,11 +1,7 @@
 offset_dir: /tmp
 outputs:
-  console:
-    uri: file:///dev/stdout
-    encoder: json
-  statsd:
-    uri: udp+statsd+buffered://localhost:2003
-    encoder: statsd
+  console: file+json:///dev/stdout
+  statsd: udp+statsd://localhost:2003
 groups:
   syslog:
     glob: /var/log/system.log

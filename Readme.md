@@ -100,13 +100,13 @@ Or for a destination `conf.d` YAML file:
 
 ```yml
 destinations:
-  # a key/name for the destination
-  stats:
-    # current protocols: udp, tcp, file
-    protocol: udp
-    address: foo.bar.com:1234
-    # current encodings: json, statsd
-    encoding: statsd
+  # a key/url for the destination.  Typically, the scheme portion of the url
+  # will be of the form transport+encoding.  We currently support statsd and 
+  # json encodings, as well as udp, tcp, and file transports.
+  stats: udp+statsd://foo.bar.com:1234
+  
+  # Typically, this should be in its own conf.d/*.yaml file.
+  tmp: file+json:///tmp/json.log
 ```
 
 Look in the cookbook directory for more examples.
