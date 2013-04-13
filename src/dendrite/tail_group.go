@@ -8,28 +8,41 @@ import (
 	"time"
 )
 
+type TailGroups []*TailGroup
+
 type TailGroup struct {
 	Glob      string
 	Pattern   string
 	OffsetDir string
 	Name      string
 	Tails     map[string]*Tail
-	Encoder   Encoder
 
-	output chan string
+	output chan Record
 	fields []FieldSpec
 }
 
-func NewTailGroup(config ConfigGroup, output chan string) *TailGroup {
+func (groups *TailGroups) Loop() {
+	for {
+		groups.Poll()
+		time.Sleep(1 * time.Second)
+	}
+}
+
+
+func (groups *TailGroups) Poll() {
+	for _, g := range *groups {
+		g.Poll()
+	}
+}
+
+func NewTailGroup(config SourceConfig, output chan Record) *TailGroup {
 	group := new(TailGroup)
 	group.output = output
-	group.Encoder = config.Encoder
 	group.Name = config.Name
 	group.Glob = config.Glob
 	group.Pattern = config.Pattern
 	group.OffsetDir = config.OffsetDir
 	group.Tails = make(map[string]*Tail)
-	logs.Debug("TGFL: %d", len(config.Fields))
 	group.fields = config.Fields
 	group.Refresh()
 	return group
@@ -46,7 +59,7 @@ func (group *TailGroup) activate(match string) {
 }
 
 func (group *TailGroup) NewParser(file string) Parser {
-	return NewRegexpParser(group.Name, file, group.output, group.Pattern, group.fields, group.Encoder)
+	return NewRegexpParser(group.Name, file, group.output, group.Pattern, group.fields)
 }
 
 func (group *TailGroup) deactivate(match string) {

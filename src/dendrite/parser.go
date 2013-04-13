@@ -13,6 +13,8 @@ type Column struct {
 	Value interface{}
 }
 
+type Record map[string]Column
+
 type Parser interface {
 	Consume(bytes []byte, counter *int64)
 }
@@ -20,16 +22,14 @@ type Parser interface {
 type RegexpParser struct {
 	group    string
 	compiled *regexp.Regexp
-	output   chan string
+	output   chan Record
 	buffer   []byte
 	fields   []FieldSpec
 	file     string
-	encoder  Encoder
 }
 
-func NewRegexpParser(group string, file string, output chan string, pattern string, fields []FieldSpec, encoder Encoder) Parser {
+func NewRegexpParser(group string, file string, output chan Record, pattern string, fields []FieldSpec) Parser {
 	parser := new(RegexpParser)
-	parser.encoder = encoder
 	parser.file = file
 	parser.group = group
 	parser.output = output
@@ -119,8 +119,7 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 				panic(nil)
 			}
 		}
-		o := parser.output
-		parser.encoder.Encode(out, o)
+    parser.output <- out
 		atomic.AddInt64(counter, int64(m[1]))
 
 		parser.buffer = parser.buffer[m[1]:]
