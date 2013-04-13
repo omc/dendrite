@@ -109,6 +109,13 @@ destinations:
   tmp: file+json:///tmp/json.log
 ```
 
+```yml
+destinations:
+  # another example
+  tmp: file+json:///tmp/json.log
+```
+
+
 Look in the cookbook directory for more examples.
 
 ## Contributing
