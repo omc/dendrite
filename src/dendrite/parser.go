@@ -119,7 +119,7 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 				panic(nil)
 			}
 		}
-    parser.output <- out
+		parser.output <- out
 		atomic.AddInt64(counter, int64(m[1]))
 
 		parser.buffer = parser.buffer[m[1]:]

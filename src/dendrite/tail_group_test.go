@@ -7,18 +7,17 @@ import (
 	"time"
 )
 
-var config *ConfigGroup = nil
+var config *SourceConfig = nil
 var group *TailGroup = nil
 
 var _tg_init = func() {
-	config = new(ConfigGroup)
+	config = new(SourceConfig)
 	config.Glob = "./data/solr*txt"
 	config.Pattern = "(?P<line>.+)\n"
 	config.OffsetDir = "tmp"
-	config.Encoder = new(JsonEncoder)
 	_ = os.RemoveAll(config.OffsetDir)
 	os.Mkdir(config.OffsetDir, 0777)
-	output = make(chan string, 100000)
+	output = make(chan Record, 100000)
 	matches, _ := filepath.Glob(config.Glob)
 	for _, m := range matches {
 		os.Chtimes(m, time.Now(), time.Now())

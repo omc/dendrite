@@ -3,6 +3,7 @@ package dendrite
 import (
 	"io/ioutil"
 	"os"
+	"encoding/json"
 	"testing"
 	"time"
 )
@@ -17,16 +18,15 @@ func (*FixedTimeProvider) Now() time.Time {
 var parser Parser
 var offsetFile string
 var tail *Tail
-var output chan string
-var line = "{\"_file\":\"solr.txt\",\"_group\":\"foo\",\"_offset\":0,\"_time\":1234567890,\"line\":\"INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1\"}"
+var output chan Record
+var line = "{\"_file\":{\"Type\":0,\"Value\":\"solr.txt\"},\"_group\":{\"Type\":0,\"Value\":\"foo\"},\"_offset\":{\"Type\":2,\"Value\":0},\"_time\":{\"Type\":6,\"Value\":1234567890},\"line\":{\"Type\":0,\"Value\":\"INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1\"}}"
 
 func _tail_init() {
 	StandardTimeProvider = new(FixedTimeProvider)
-	output = make(chan string, 100)
+	output = make(chan Record, 100)
 	offsetFile = os.TempDir() + "test.txt"
 	_ = os.Remove(offsetFile)
-	encoder := new(JsonEncoder)
-	parser = NewRegexpParser("foo", "solr.txt", output, "(?P<line>.+)\n", nil, encoder)
+	parser = NewRegexpParser("foo", "solr.txt", output, "(?P<line>.+)\n", nil)
 	tail = NewTail(parser, "data/solr.txt", offsetFile)
 }
 
@@ -49,9 +49,10 @@ func TestStartsAtOffset(t *testing.T) {
 func TestReading(t *testing.T) {
 	_tail_init()
 	go tail.Poll()
-	str := <-output
-	if str != line {
-		t.Error("Oops, got ", str)
+	rec := <-output
+	json, _ := json.Marshal(rec)
+	if string(json) != line {
+		t.Errorf("Oops, diff between\n    %s\n    %s", string(json), line)
 	}
 }
 
