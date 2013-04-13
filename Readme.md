@@ -104,9 +104,6 @@ destinations:
   # will be of the form transport+encoding.  We currently support statsd and 
   # json encodings, as well as udp, tcp, and file transports.
   stats: udp+statsd://foo.bar.com:1234
-  
-  # Typically, this should be in its own conf.d/*.yaml file.
-  tmp: file+json:///tmp/json.log
 ```
 
 ```yml
