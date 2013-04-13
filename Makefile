@@ -4,6 +4,7 @@ build:
 	go build
 
 test:	*.go
+	go test -v
 	cd src/dendrite && go test -v
 
 fmt:

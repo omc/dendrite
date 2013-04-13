@@ -28,7 +28,6 @@ func (groups *TailGroups) Loop() {
 	}
 }
 
-
 func (groups *TailGroups) Poll() {
 	for _, g := range *groups {
 		g.Poll()

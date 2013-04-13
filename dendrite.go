@@ -33,8 +33,13 @@ func main() {
 		logs.SetLevel(logs.INFO)
 	}
 
-	// Read the config file, and link up all of the objects
-	config := dendrite.NewConfig(*configFile)
+	// Read the config files
+	config, err := dendrite.NewConfig(*configFile)
+	if err != nil {
+		logs.Fatal("Can't read configuration: %s", err)
+	}
+
+	// Link up all of the objects
 	rw := config.CreateReadWriter()
 	groups := config.CreateAllGroups(rw)
 
