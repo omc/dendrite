@@ -21,7 +21,7 @@ do
 
   rm -rf $TAGGED_NAME
   mkdir -p $TAGGED_NAME
-  mv $BINARY $TAGGED_NAME
+  mv $BINARY $TAGGED_NAME/dendrite
   for F in $INCLUDES
   do
     cp -R $F $TAGGED_NAME
