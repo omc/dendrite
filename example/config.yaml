@@ -1,12 +1,10 @@
 offset_dir: /tmp
 outputs:
   console:
-    address: /dev/stdout
-    protocol: file
+    uri: file:///dev/stdout
     encoder: json
   statsd:
-    address: localhost:2003
-    protocol: udp
+    uri: udp+statsd+buffered://localhost:2003
     encoder: statsd
 groups:
   syslog:
