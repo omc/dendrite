@@ -114,3 +114,7 @@ Look in the cookbook directory for more examples.
 ## Contributing
 
 Join us in our [Dendrite HipChat](https://www.hipchat.com/gKr8c8S4o) room to give feedback and chat about how you might be interested in using and/or contributing.
+
+## Getting Dendrite
+
+For binaries of versioned releases, please look at 
