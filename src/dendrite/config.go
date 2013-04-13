@@ -1,9 +1,9 @@
 package dendrite
 
 import (
-	"github.com/kylelemons/go-gypsy/yaml"
-
 	"github.com/fizx/logs"
+	"github.com/kylelemons/go-gypsy/yaml"
+	"net/url"
 	"regexp"
 	"strconv"
 )
@@ -40,15 +40,14 @@ type ConfigGroup struct {
 }
 
 type Config struct {
-	Protocol  string
-	Address   string
+	Url       *url.URL
 	OffsetDir string
 	Encoder   Encoder
 	Groups    []ConfigGroup
 }
 
 func (config *Config) AddGroup(name string, group yaml.Node) {
-  logs.Info("Adding group: %s", name)
+	logs.Info("Adding group: %s", name)
 	groupMap := group.(yaml.Map)
 	var groupStruct ConfigGroup
 	groupStruct.Name = name
@@ -131,21 +130,11 @@ func (config *Config) Populate(doc *yaml.File) {
 
 	root := doc.Root.(yaml.Map)
 
-  // config.Address = root.Key("address").(yaml.Scalar).String()
-  // config.OffsetDir = root.Key("offset_dir").(yaml.Scalar).String()
-
-  // switch root.Key("encoder").(yaml.Scalar).String() {
-  // case "json":
-  //  config.Encoder = new(JsonEncoder)
-  // case "statsd":
-  //  config.Encoder = new(StatsdEncoder)
-  // }
-
-	p, err := doc.Get(".protocol")
+	p, err := doc.Get(".uri")
 	if err != nil {
 		p = "tcp"
 	}
-	config.Protocol = p
+	config.Url, err = url.Parse(p)
 
 	groups := root.Key("groups")
 	for name, group := range groups.(yaml.Map) {

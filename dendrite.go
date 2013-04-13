@@ -2,16 +2,15 @@ package main
 
 import (
 	"./src/dendrite"
-	"strings"
 	"bufio"
 	"flag"
-	"fmt"
 	"github.com/fizx/logs"
 	"github.com/kylelemons/go-gypsy/yaml"
+	"io"
 	"io/ioutil"
-	"net"
 	"os"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -46,7 +45,7 @@ func main() {
 			if err != nil {
 				logs.Warn("Can't read relevant conf.d: %s", err)
 			} else {
-			  base := strings.Replace(entry.Name(), ".yaml", "", 1)
+				base := strings.Replace(entry.Name(), ".yaml", "", 1)
 				config.AddGroup(base, doc.Root)
 			}
 		}
@@ -65,42 +64,30 @@ func main() {
 			}
 		}
 	}()
-	switch config.Protocol {
-	case "file":
-		file, err := os.OpenFile(config.Address, 0, 0777)
-		if err != nil {
-			logs.Error("Can't write to: ", err)
-		}
-		for {
-			line := <-out
-			fmt.Fprintln(file, line)
-		}
-	case "udp", "tcp":
-		conn, err := net.Dial(config.Protocol, config.Address)
-		if err != nil {
-			logs.Error("Can't write to: ", err)
-		} else {
-			if config.Protocol == "tcp" {
-				go func() {
-					reader := bufio.NewReader(conn)
-					for {
-						str, err := reader.ReadString('\n')
-						if err != nil {
-							logs.Warn("connection closed with %s", err)
-							os.Exit(0)
-						} else {
-							logs.Info("received: %s", str)
-						}
-					}
-				}()
-			}
 
+	rw, err := dendrite.NewReadWriter(config.Url)
+	if err != nil {
+		panic(err)
+	} else {
+		reader := bufio.NewReader(rw)
+		go func() {
 			for {
-				line := <-out
-				fmt.Fprintln(conn, line)
+				str, err := reader.ReadString('\n')
+				if err == io.EOF {
+					logs.Debug("eof")
+				} else if err != nil {
+					logs.Error("error reading: %s", err)
+					os.Exit(0)
+				} else {
+					logs.Info("received: %s", str)
+				}
+			}
+		}()
+		for {
+			_, err = rw.Write([]byte(<-out))
+			if err != nil {
+			  logs.Error("error writing: %s", err)
 			}
 		}
-	default:
-		logs.Error("Unknown protocol: ", config.Protocol)
 	}
 }
