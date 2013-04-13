@@ -1,3 +1,5 @@
+# These links don't work yet, because I haven't published!
+
 ## 0.1.0
 
 * darwin-386 -- [tar.gz](http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/darwin-386/0.1.0/dendrite-darwin-386-0.1.0.tar.gz) [md5](http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/darwin-386/0.1.0/dendrite-darwin-386-0.1.0.tar.gz.md5) | [tar.bz2](http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/darwin-386/0.1.0/dendrite-darwin-386-0.1.0.tar.bz2) [md5](http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/darwin-386/0.1.0/dendrite-darwin-386-0.1.0.tar.bz2.md5) | [zip](http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/darwin-386/0.1.0/dendrite-darwin-386-0.1.0.zip) [md5](http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/darwin-386/0.1.0/dendrite-darwin-386-0.1.0.zip.md5)
