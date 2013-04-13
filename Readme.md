@@ -117,4 +117,4 @@ Join us in our [Dendrite HipChat](https://www.hipchat.com/gKr8c8S4o) room to giv
 
 ## Getting Dendrite
 
-For binaries of versioned releases, please look at our [downloads page](./downloads.md)
+For binaries of versioned releases, please look at our [downloads page](https://github.com/onemorecloud/dendrite/blob/master/downloads.md)
