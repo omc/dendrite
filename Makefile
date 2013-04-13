@@ -1,4 +1,7 @@
-default: test
+default: build test 
+
+build:
+	go build
 
 test:	*.go
 	cd src/dendrite && go test -v
