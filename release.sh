@@ -9,15 +9,20 @@ source ~/workspace/golang-crosscompile/crosscompile.bash
 go-build-all dendrite.go
 
 INCLUDES="cookbook LICENSE Readme.md VERSION"
+VERSION=`cat VERSION`
+ROOT="http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/"
+
+touch downloads.md
+echo "## $VERSION" > tmp.md
+echo >> tmp.md
 
 for BINARY in `find . -type f -name "dendrite-*" -maxdepth 1`
 do
-  NAME=`echo $BINARY | sed 's/dendrite-//'`
-  VERSION=`cat VERSION`
+  NAME=`echo $BINARY | sed 's/dendrite-//' | xargs basename`
   DIST="dist/$NAME/$VERSION"
   mkdir -p $DIST
   
-  TAGGED_NAME="${BINARY}-$VERSION"
+  TAGGED_NAME=`basename ${BINARY}-$VERSION`
 
   rm -rf $TAGGED_NAME
   mkdir -p $TAGGED_NAME
@@ -41,9 +46,19 @@ do
   zip -r $ZIP $TAGGED_NAME
   md5sum $ZIP > $DIST/$ZIP.md5
   mv $ZIP $DIST
-  
+
+  WEB="$ROOT$NAME/$VERSION/"
   rm -rf $TAGGED_NAME
+  echo "* $NAME -- [tar.gz]($WEB$GZ) [md5]($WEB$GZ.md5) | [tar.bz2]($WEB$BZ) [md5]($WEB$BZ.md5) | [zip]($WEB$ZIP) [md5]($WEB$ZIP.md5)" >> tmp.md
   
 done
+
+echo >> tmp.md
+echo >> tmp.md
+
+cp downloads.md tmp2.md
+cat tmp.md tmp2.md > downloads.md
+rm tmp*.md
+markdown downloads.md > dist/index.html
 
 s3cmd sync dist/. s3://dendrite-binaries
