@@ -1,14 +1,16 @@
 package dendrite
 
 import (
+	"fmt"
 	"github.com/fizx/logs"
 	"github.com/kylelemons/go-gypsy/yaml"
-	"io"
 	"net/url"
 	"path"
 	"path/filepath"
 	"regexp"
 )
+
+var DefaultPattern = "(?P<line>.*?)\r?\n"
 
 type FieldType int
 
@@ -22,7 +24,7 @@ const (
 	Timestamp
 )
 
-type FieldSpec struct {
+type FieldConfig struct {
 	Name    string
 	Alias   string
 	Type    FieldType
@@ -34,13 +36,14 @@ type FieldSpec struct {
 type SourceConfig struct {
 	Glob      string
 	Pattern   string
-	Fields    []FieldSpec
+	Fields    []FieldConfig
 	Name      string
 	OffsetDir string
 }
 
 type DestinationConfig struct {
-	Url *url.URL
+	Name string
+	Url  *url.URL
 }
 
 type Config struct {
@@ -49,29 +52,44 @@ type Config struct {
 	Sources      []SourceConfig
 }
 
-func (config *Config) CreateReadWriter() io.ReadWriter {
-	return nil
+func (config *Config) CreateDestinations() Destinations {
+	dests := NewDestinations()
+	for _, subConfig := range config.Destinations {
+		dest, err := NewDestination(subConfig)
+		if err != nil {
+			logs.Warn("Can't load destination, continuing...: %s", err)
+			continue
+		}
+		dests = append(dests, dest)
+	}
+
+	return dests
 }
 
-func (config *Config) CreateAllGroups(rw io.ReadWriter) TailGroups {
+func (config *Config) CreateAllTailGroups(drain chan Record) TailGroups {
 	groups := make([]*TailGroup, 0)
-	// for _, cg := range config.Groups {
-	//     // groups = append(groups, NewTailGroup(cg, out))
-	// }
+	for _, subConfig := range config.Sources {
+		groups = append(groups, NewTailGroup(subConfig, drain))
+	}
 	return groups
 }
 
+// Mostly delegate
 func NewConfig(configFile string) (*Config, error) {
+	mapping, err := assembleConfigFiles(configFile)
+	if err != nil {
+		return nil, err
+	}
+	return configFromMapping(mapping)
+}
+
+func assembleConfigFiles(configFile string) (map[string]interface{}, error) {
 	doc, err := yaml.ReadFile(configFile)
 	if err != nil {
 		return nil, err
 	}
 
-	config := new(Config)
-	config.Sources = make([]SourceConfig, 0)
-	config.Destinations = make([]DestinationConfig, 0)
-
-	config.Populate(doc)
+	mapping := YamlUnmarshal(doc.Root).(map[string]interface{})
 
 	entries, err := filepath.Glob(path.Dir(configFile) + "/conf.d/*.yaml")
 	if err != nil {
@@ -82,125 +100,102 @@ func NewConfig(configFile string) (*Config, error) {
 			if err != nil {
 				logs.Warn("Can't read relevant conf.d: %s", err)
 			} else {
-				config.Populate(doc)
+				inner := YamlUnmarshal(doc.Root).(map[string]interface{})
+				RecursiveMergeNoConflict(mapping, inner, "")
 			}
 		}
 	}
-	return config, nil
+	return mapping, nil
 }
 
-func (config *Config) Populate(doc *yaml.File) {
-	// root := doc.Root.(yaml.Map)
-	off, err := doc.Get(".global.offset_dir")
-	if err == nil {
-		config.OffsetDir = off
+func configFromMapping(mapping map[string]interface{}) (*Config, error) {
+	var err error = nil
+	config := new(Config)
+	config.Sources = make([]SourceConfig, 0)
+	config.Destinations = make([]DestinationConfig, 0)
+
+	global, err := getMap(mapping, "global")
+	if err != nil {
+		return nil, fmt.Errorf("no global section in the config file")
 	}
 
-	// groups := root.Key("groups")
-	// for name, group := range groups.(yaml.Map) {
-	//  config.AddGroup(name, group)
-	// }
+	config.OffsetDir, err = getString(global, "offset_dir")
 
-	// p, err := doc.Get(".uri")
-	// if err != nil {
-	//   p = "tcp"
-	// }
-	// config.Url, err = url.Parse(p)
-	//   tmp, _ = yaml.Child(fieldDetails, ".format")
-	// if tmp != nil {
-	//  fieldSpec.Format = tmp.(yaml.Scalar).String()
-	// }
-	// config.Groups = make([]ConfigGroup, 0)
-	// 
-	// root := doc.Root.(yaml.Map)
-	// 
-	// p, err := doc.Get(".uri")
-	// if err != nil {
-	//  p = "tcp"
-	// }
-	// config.Url, err = url.Parse(p)
-	// 
-	// groups := root.Key("groups")
-	// for name, group := range groups.(yaml.Map) {
-	//  config.AddGroup(name, group)
-	// }
-}
+	sources, err := getMap(mapping, "sources")
+	if err != nil {
+		return nil, fmt.Errorf("no sources section in the config file")
+	}
 
-func (config *Config) AddGroup(name string, group yaml.Node) {
-	// logs.Info("Adding group: %s", name)
-	// groupMap := group.(yaml.Map)
-	// var groupStruct ConfigGroup
-	// groupStruct.Name = name
-	// groupStruct.Glob = groupMap.Key("glob").(yaml.Scalar).String()
-	// groupStruct.Pattern = groupMap.Key("pattern").(yaml.Scalar).String()
-	// groupStruct.Fields = make([]FieldSpec, 0)
-	// groupStruct.OffsetDir = config.OffsetDir
-	// groupStruct.Encoder = config.Encoder
-	// 
-	// for alias, v := range groupMap.Key("fields").(yaml.Map) {
-	//  var fieldDetails = v.(yaml.Map)
-	//  var fieldSpec FieldSpec
-	//  fieldSpec.Alias = alias
-	//  fieldSpec.Name = alias
-	// 
-	//  tmp, _ := yaml.Child(fieldDetails, ".name")
-	//  if tmp != nil {
-	//    fieldSpec.Name = tmp.(yaml.Scalar).String()
-	//  }
-	// 
-	//  fieldSpec.Group = -1
-	//  tmp, _ = yaml.Child(fieldDetails, ".group")
-	//  if tmp != nil {
-	//    fieldSpec.Name = ""
-	//    i, err := strconv.ParseInt(tmp.(yaml.Scalar).String(), 10, 64)
-	//    if err != nil {
-	//      logs.Error("error in parsing int", err)
-	//    }
-	// 
-	//    fieldSpec.Group = int(i)
-	//  }
-	// 
-	//  tmp, _ = yaml.Child(fieldDetails, ".pattern")
-	//  if tmp != nil {
-	//    p, err := regexp.Compile(tmp.(yaml.Scalar).String())
-	//    if err != nil {
-	//      logs.Error("error in compiling regexp", err)
-	//    } else {
-	//      fieldSpec.Pattern = p
-	//    }
-	//  }
-	// 
-	//  tmp, _ = yaml.Child(fieldDetails, ".format")
-	//  if tmp != nil {
-	//    fieldSpec.Format = tmp.(yaml.Scalar).String()
-	//  }
-	// 
-	//  tmp, _ = yaml.Child(fieldDetails, ".type")
-	//  if tmp == nil {
-	//    fieldSpec.Type = String
-	//  } else {
-	//    switch tmp.(yaml.Scalar).String() {
-	//    case "int":
-	//      fieldSpec.Type = Integer
-	//    case "gauge":
-	//      fieldSpec.Type = Gauge
-	//    case "metric":
-	//      fieldSpec.Type = Metric
-	//    case "counter":
-	//      fieldSpec.Type = Counter
-	//    case "string":
-	//      fieldSpec.Type = String
-	//    case "tokenized":
-	//      fieldSpec.Type = Tokens
-	//    case "timestamp", "date":
-	//      fieldSpec.Type = Timestamp
-	//    default:
-	//      logs.Error("Can't recognize field type")
-	//      panic(nil)
-	//    }
-	//  }
-	// 
-	//  groupStruct.Fields = append(groupStruct.Fields, fieldSpec)
-	// }
-	// config.Groups = append(config.Groups, groupStruct)
+	for name, _ := range sources {
+		src, err := getMap(sources, name)
+		if err != nil {
+			logs.Warn("Invalid source: %s, continuing...", name)
+			continue
+		}
+
+		var source SourceConfig
+		source.OffsetDir = config.OffsetDir
+		source.Glob, err = getString(src, "glob")
+		if err != nil {
+			return nil, err
+		}
+		source.Pattern, err = getString(src, "pattern")
+		if err != nil {
+			source.Pattern = DefaultPattern
+		}
+		fields, err := getMap(src, "fields")
+		for name, _ := range fields {
+			fld, err := getMap(fields, name)
+			if err != nil {
+				logs.Warn("%s is not a map, continuing... (error was %s)", name, err)
+				continue
+			}
+
+			var field FieldConfig
+			field.Alias = name
+
+			field.Name, err = getString(fld, "name")
+			if err != nil {
+				field.Name = field.Alias
+			}
+
+			field.Group, err = getInt(fld, "group")
+
+			s, err := getString(fld, "type")
+			field.Type, err = parseField(s)
+			if err != nil {
+				logs.Warn("Invalid field type: %s, continuing... (error was %s)", s, err)
+				continue
+			}
+
+			field.Format, err = getString(fld, "format")
+
+			s, err = getString(fld, "pattern")
+			field.Pattern, err = regexp.Compile(s)
+			if err != nil {
+				logs.Warn("Invalid regex: %s, continuing... (error was %s)", s, err)
+				continue
+			}
+		}
+		config.Sources = append(config.Sources, source)
+	}
+
+	destinations, err := getMap(mapping, "sources")
+	if err != nil {
+		return nil, fmt.Errorf("no destinations section in the config file")
+	}
+
+	for name, _ := range destinations {
+		var dest DestinationConfig
+		urlString, err := getString(destinations, name)
+		u, err := url.Parse(urlString)
+		if err != nil {
+			logs.Warn("Invalid URL: %s, continuing... (error was %s)", urlString, err)
+			continue
+		}
+		dest.Name = name
+		dest.Url = u
+	}
+
+	return config, nil
 }

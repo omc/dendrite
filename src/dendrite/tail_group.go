@@ -18,7 +18,7 @@ type TailGroup struct {
 	Tails     map[string]*Tail
 
 	output chan Record
-	fields []FieldSpec
+	fields []FieldConfig
 }
 
 func (groups *TailGroups) Loop() {

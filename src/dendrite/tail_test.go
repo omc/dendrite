@@ -1,9 +1,9 @@
 package dendrite
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
-	"encoding/json"
 	"testing"
 	"time"
 )

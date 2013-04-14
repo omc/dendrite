@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"strings"
 )
 
 type noOpReader struct{}
@@ -21,7 +22,8 @@ func (er *noOpReader) Read(p []byte) (n int, err error) {
 }
 
 func NewReadWriter(u *url.URL) (io.ReadWriter, error) {
-	switch u.Scheme {
+	protocol := strings.Split(u.Scheme, "+")[0]
+	switch protocol {
 	case "file":
 		return NewFileReadWriter(u.Path)
 	case "udp":

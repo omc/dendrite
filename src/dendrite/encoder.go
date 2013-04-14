@@ -2,17 +2,38 @@ package dendrite
 
 import (
 	"encoding/json"
+	"net/url"
 	"fmt"
+	"strings"
+	"io"
 )
 
 type Encoder interface {
-	Encode(out map[string]Column, ch chan string)
+	Encode(out map[string]Column, writer io.Writer)
 }
 
 type JsonEncoder struct{}
 type StatsdEncoder struct{}
+type RawStringEncoder struct{}
 
-func (*JsonEncoder) Encode(out map[string]Column, ch chan string) {
+func NewEncoder(u *url.URL) (Encoder, error) {
+  a := strings.Split(u.Scheme, "+")
+  switch a[len(a)-1]{
+  case "json": return new(JsonEncoder),nil
+  case "statsd": return new( StatsdEncoder),nil
+  }
+  return new(RawStringEncoder),nil
+}
+
+func (*RawStringEncoder) Encode(out map[string]Column, writer io.Writer) {
+  for _, v := range out {
+    if v.Type == String {
+      writer.Write([]byte(v.Value.(string)))
+    }
+	}
+}
+
+func (*JsonEncoder) Encode(out map[string]Column, writer io.Writer) {
 	stripped := make(map[string]interface{})
 	for k, v := range out {
 		stripped[k] = v.Value
@@ -21,18 +42,18 @@ func (*JsonEncoder) Encode(out map[string]Column, ch chan string) {
 	if err != nil {
 		panic(err)
 	}
-	ch <- string(bytes)
+  writer.Write(bytes)
 }
 
-func (*StatsdEncoder) Encode(out map[string]Column, ch chan string) {
+func (*StatsdEncoder) Encode(out map[string]Column, writer io.Writer) {
 	for k, v := range out {
 		switch v.Type {
 		case Gauge:
-			ch <- fmt.Sprintf("%s:%d|g", k, v.Value)
+			writer.Write([]byte( fmt.Sprintf("%s:%d|g", k, v.Value)))
 		case Metric:
-			ch <- fmt.Sprintf("%s:%d|m", k, v.Value)
+			writer.Write([]byte( fmt.Sprintf("%s:%d|m", k, v.Value)))
 		case Counter:
-			ch <- fmt.Sprintf("%s:%d|c", k, v.Value)
+			writer.Write([]byte( fmt.Sprintf("%s:%d|c", k, v.Value)))
 		}
 	}
 }

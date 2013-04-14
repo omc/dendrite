@@ -13,6 +13,7 @@ import (
 var configFile = flag.String("f", "/etc/dendrite/config.yaml", "location of the config file")
 var debug = flag.Bool("d", false, "log at DEBUG")
 var logFile = flag.String("l", "/var/log/dendrite.log", "location of the log file")
+var once = flag.Bool("o", false, "don't follow the sources; quit once up-to-date")
 
 func main() {
 	flag.Parse()
@@ -40,12 +41,13 @@ func main() {
 	}
 
 	// Link up all of the objects
-	rw := config.CreateReadWriter()
-	groups := config.CreateAllGroups(rw)
+	ch := make(chan dendrite.Record, 100)
+  dests := config.CreateDestinations()
+	groups := config.CreateAllTailGroups(ch)
 
 	// If any of our destinations talk back, log it.
 	go func() {
-		reader := bufio.NewReader(rw)
+		reader := bufio.NewReader(dests.Reader())
 		for {
 			str, err := reader.ReadString('\n')
 			if err == io.EOF {
@@ -59,5 +61,12 @@ func main() {
 	}()
 
 	// Do the event loop
-	groups.Loop()
+	go dests.Consume(ch)
+	if *once {
+		logs.Debug("starting the poll")
+		groups.Poll()
+	} else {
+		logs.Debug("starting the loop")
+		groups.Loop()
+	}
 }
