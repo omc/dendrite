@@ -24,11 +24,11 @@ type RegexpParser struct {
 	compiled *regexp.Regexp
 	output   chan Record
 	buffer   []byte
-	fields   []FieldSpec
+	fields   []FieldConfig
 	file     string
 }
 
-func NewRegexpParser(group string, file string, output chan Record, pattern string, fields []FieldSpec) Parser {
+func NewRegexpParser(group string, file string, output chan Record, pattern string, fields []FieldConfig) Parser {
 	parser := new(RegexpParser)
 	parser.file = file
 	parser.group = group
@@ -53,7 +53,7 @@ func NewRegexpParser(group string, file string, output chan Record, pattern stri
 					}
 				}
 				if !found {
-					var spec FieldSpec
+					var spec FieldConfig
 					spec.Group = i
 					spec.Alias = name
 					spec.Type = String
