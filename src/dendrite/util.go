@@ -2,10 +2,24 @@ package dendrite
 
 import (
 	"fmt"
-	"io"
 	"github.com/kylelemons/go-gypsy/yaml"
+	"io"
 	"strconv"
 )
+
+func Unescape(in string) string {
+	bytes := []byte(in)
+	out := make([]byte, 0, len(bytes)-2)
+	for i := 1; i < len(bytes)-1; i++ {
+		c := bytes[i]
+		if c == '\\' {
+			i++
+			c = bytes[i]
+		}
+		out = append(out, c)
+	}
+	return string(out)
+}
 
 func YamlUnmarshal(node yaml.Node) interface{} {
 	switch node := node.(type) {
@@ -22,28 +36,32 @@ func YamlUnmarshal(node yaml.Node) interface{} {
 		}
 		return out
 	case yaml.Scalar:
-		return node
+		if len(node) > 0 && node[0] == '"' {
+			return Unescape(string(node))
+		} else {
+			return node
+		}
 	default:
 	}
 	return nil
 }
 
-type anyReader struct{
-  readers []io.Reader
+type anyReader struct {
+	readers []io.Reader
 }
 
 func NewAnyReader(r []io.Reader) io.Reader {
-  return &anyReader{r}
+	return &anyReader{r}
 }
 
 func (any *anyReader) Read(buf []byte) (int, error) {
-  for _, r := range any.readers {
-    i, e := r.Read(buf)
-    if (e == io.EOF) {
-      continue
-    } else {
-      return i, e
-    }
+	for _, r := range any.readers {
+		i, e := r.Read(buf)
+		if e == io.EOF {
+			continue
+		} else {
+			return i, e
+		}
 	}
 	return 0, io.EOF
 }
