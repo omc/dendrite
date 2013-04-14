@@ -3,6 +3,8 @@ package dendrite
 import (
 	"fmt"
 	"github.com/fizx/logs"
+
+	"encoding/json"
 	"github.com/kylelemons/go-gypsy/yaml"
 	"net/url"
 	"path"
@@ -109,6 +111,8 @@ func assembleConfigFiles(configFile string) (map[string]interface{}, error) {
 }
 
 func configFromMapping(mapping map[string]interface{}) (*Config, error) {
+	b, _ := json.Marshal(mapping)
+	logs.Debug("mapping: %s", string(b))
 	var err error = nil
 	config := new(Config)
 	config.Sources = make([]SourceConfig, 0)
@@ -134,6 +138,7 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 		}
 
 		var source SourceConfig
+		source.Fields = make([]FieldConfig, 0)
 		source.OffsetDir = config.OffsetDir
 		source.Glob, err = getString(src, "glob")
 		if err != nil {
@@ -143,11 +148,18 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 		if err != nil {
 			source.Pattern = DefaultPattern
 		}
+
+		_, err = regexp.Compile(source.Pattern)
+		if err != nil {
+			logs.Warn("%s is not a valid regexp, continuing... (%s)", source.Pattern, err)
+			continue
+		}
+
 		fields, err := getMap(src, "fields")
 		for name, _ := range fields {
 			fld, err := getMap(fields, name)
 			if err != nil {
-				logs.Warn("%s is not a map, continuing... (error was %s)", name, err)
+				logs.Warn("%s is not a map, continuing... (%s)", name, err)
 				continue
 			}
 
@@ -167,6 +179,7 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 				logs.Warn("Invalid field type: %s, continuing... (error was %s)", s, err)
 				continue
 			}
+			logs.Info("found type %s", s)
 
 			field.Format, err = getString(fld, "format")
 
@@ -176,11 +189,12 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 				logs.Warn("Invalid regex: %s, continuing... (error was %s)", s, err)
 				continue
 			}
+			source.Fields = append(source.Fields, field)
 		}
 		config.Sources = append(config.Sources, source)
 	}
 
-	destinations, err := getMap(mapping, "sources")
+	destinations, err := getMap(mapping, "destinations")
 	if err != nil {
 		return nil, fmt.Errorf("no destinations section in the config file")
 	}
@@ -193,8 +207,10 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 			logs.Warn("Invalid URL: %s, continuing... (error was %s)", urlString, err)
 			continue
 		}
+		logs.Info("Found destination: %s", urlString)
 		dest.Name = name
 		dest.Url = u
+		config.Destinations = append(config.Destinations, dest)
 	}
 
 	return config, nil

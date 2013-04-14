@@ -36,7 +36,7 @@ func NewRegexpParser(group string, file string, output chan Record, pattern stri
 	parser.buffer = make([]byte, 0)
 	re, err := regexp.Compile(pattern)
 	if err != nil {
-		logs.Debug("Cannot parse regexp:", err)
+		panic(err)
 	} else {
 		parser.compiled = re
 		for i, name := range re.SubexpNames() {
@@ -71,7 +71,7 @@ func NewRegexpParser(group string, file string, output chan Record, pattern stri
 
 func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 	parser.buffer = append(parser.buffer, bytes...)
-	logs.Debug("consuming %d bytes", len(bytes))
+	logs.Debug("consuming %d bytes of %s", len(bytes), parser.file)
 	for {
 		m := parser.compiled.FindSubmatchIndex(parser.buffer)
 		if m == nil {
@@ -124,4 +124,5 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 
 		parser.buffer = parser.buffer[m[1]:]
 	}
+	logs.Debug("done with %s", parser.file)
 }
