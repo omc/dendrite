@@ -63,7 +63,7 @@ sources:
     #
     # This pattern parses my OS X syslog. Syslog isn't consistent, 
     # so this may not work on your system.
-    pattern: (?P<date>.*?:[0-9]+) (?P<user>\S+) (?P<prog>\w+)\[(?P<pid>\d+)\]: (?P<text>.*)
+    pattern: "(?P<date>.*?:[0-9]+) (?P<user>\\S+) (?P<prog>\\w+)\\[(?P<pid>\\d+)\\]: (?P<text>.*)"
     
     # The output of the regexp can be post-processed. This allows you
     # to specify type information, etc.
@@ -77,7 +77,7 @@ sources:
         # date is the name of the regex match group.
         name: date
         type: timestamp
-        format: Jan _2 15:04:05
+        format: "Jan _2 15:04:05"
       line: 
         # you can match numbered subgroups, in addition to named ones.
         group: 0
@@ -103,13 +103,16 @@ destinations:
   # a key/url for the destination.  Typically, the scheme portion of the url
   # will be of the form transport+encoding.  We currently support statsd and 
   # json encodings, as well as udp, tcp, and file transports.
-  stats: udp+statsd://foo.bar.com:1234
+  #
+  # Also, the colon in urls always needs to be quoted, so as not to be 
+  # confused with nested yaml.
+  stats: "udp+statsd://foo.bar.com:1234"
 ```
 
 ```yml
 destinations:
   # another example
-  tmp: file+json:///tmp/json.log
+  tmp: "file+json:///tmp/json.log"
 ```
 
 
