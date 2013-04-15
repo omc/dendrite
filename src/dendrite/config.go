@@ -36,11 +36,12 @@ type FieldConfig struct {
 }
 
 type SourceConfig struct {
-	Glob      string
-	Pattern   string
-	Fields    []FieldConfig
-	Name      string
-	OffsetDir string
+	Glob             string
+	Pattern          string
+	Fields           []FieldConfig
+	Name             string
+	OffsetDir        string
+	MaxBackfillBytes int64
 }
 
 type DestinationConfig struct {
@@ -49,9 +50,10 @@ type DestinationConfig struct {
 }
 
 type Config struct {
-	OffsetDir    string
-	Destinations []DestinationConfig
-	Sources      []SourceConfig
+	OffsetDir        string
+	MaxBackfillBytes int64
+	Destinations     []DestinationConfig
+	Sources          []SourceConfig
 }
 
 func (config *Config) CreateDestinations() Destinations {
@@ -124,6 +126,11 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 	}
 
 	config.OffsetDir, err = getString(global, "offset_dir")
+	config.MaxBackfillBytes, err = getInt64(global, "max_backfill_bytes")
+	if err != nil {
+		logs.Warn("no max_backfill_bytes, continuing with unlimited")
+		config.MaxBackfillBytes = -1
+	}
 
 	sources, err := getMap(mapping, "sources")
 	if err != nil {
@@ -140,6 +147,7 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 		var source SourceConfig
 		source.Fields = make([]FieldConfig, 0)
 		source.OffsetDir = config.OffsetDir
+		source.MaxBackfillBytes = config.MaxBackfillBytes
 		source.Glob, err = getString(src, "glob")
 		if err != nil {
 			return nil, err

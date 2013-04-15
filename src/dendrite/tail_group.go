@@ -17,8 +17,9 @@ type TailGroup struct {
 	Name      string
 	Tails     map[string]*Tail
 
-	output chan Record
-	fields []FieldConfig
+	output      chan Record
+	fields      []FieldConfig
+	maxBackfill int64
 }
 
 func (groups *TailGroups) Loop() {
@@ -43,6 +44,7 @@ func NewTailGroup(config SourceConfig, output chan Record) *TailGroup {
 	group.OffsetDir = config.OffsetDir
 	group.Tails = make(map[string]*Tail)
 	group.fields = config.Fields
+	group.maxBackfill = config.MaxBackfillBytes
 	group.Refresh()
 	return group
 }
@@ -52,7 +54,7 @@ func (group *TailGroup) activate(match string) {
 	if !ok {
 		base := path.Base(match)
 		offset := group.OffsetDir + "/" + base + ".ptr"
-		tail = NewTail(group.NewParser(base), match, offset)
+		tail = NewTail(group.NewParser(base), group.maxBackfill, match, offset)
 		group.Tails[match] = tail
 	}
 }

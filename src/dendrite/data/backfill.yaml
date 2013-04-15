@@ -1,0 +1,19 @@
+global: 
+  offset_dir: tmp
+  max_backfill_bytes: 600
+destinations:
+  json: "file+json://tmp/out.json"
+sources:
+  solr:
+    glob: tmp/solr*
+    pattern: "(?P<line>(?P<severity>[A-Z]+)\: \\[(?P<core>\\w+)\\].*?params=\\{(?P<params>[^}]*)\\}.*hits=(?P<hits>[0-9]+)?.*status=(?P<status>[0-9]+).*QTime=(?P<qtime>[0-9]+)).*\\n"
+    fields: 
+      params:
+        type: tokenized
+        pattern: [^&=]+
+      hits:
+        type: int
+      qtime: 
+        type: int
+      status:
+        type: int

@@ -57,6 +57,21 @@ func TestTruncation(t *testing.T) {
 	}
 }
 
+func TestBackfill(t *testing.T) {
+	_init(t)
+	bash("cp src/dendrite/data/solr.txt tmp/solr.txt")
+	run("./dendrite", "-q", "0", "-d", "-f", "src/dendrite/data/backfill.yaml")
+	bytes, err := ioutil.ReadFile("tmp/out.json")
+	if err != nil {
+		t.Error(err)
+	}
+	str := string(bytes)
+	arr := strings.Split(strings.TrimSpace(str), "\n")
+	if len(arr) != (600 / 130) {
+		t.Error(len(arr), "not", (600 / 130))
+	}
+}
+
 func TestTcp(t *testing.T) {
 	_init(t)
 	run("./dendrite", "-q", "0", "-d", "-f", "src/dendrite/data/conf.yaml")

@@ -4,9 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	tails "github.com/ActiveState/tail"
-	"io"
-
 	"github.com/fizx/logs"
+	"io"
 	"os"
 	"path"
 	"strconv"
@@ -33,17 +32,19 @@ type Tail struct {
 	Watcher    tails.FileWatcher
 	Parser     Parser
 
-	offset int64
-	handle *os.File
+	maxBackfill int64
+	offset      int64
+	handle      *os.File
 }
 
-func NewTail(parser Parser, path string, offsetPath string) *Tail {
+func NewTail(parser Parser, maxBackfill int64, path string, offsetPath string) *Tail {
 	tail := new(Tail)
 	tail.Path = path
 	tail.OffsetPath = offsetPath
 	tail.Parser = parser
 	tail.Watcher = tails.NewInotifyFileWatcher(path)
 	tail.LoadOffset()
+	tail.maxBackfill = maxBackfill
 
 	handle, err := os.Open(path)
 	if err != nil {
@@ -52,11 +53,27 @@ func NewTail(parser Parser, path string, offsetPath string) *Tail {
 	} else {
 		tail.handle = handle
 	}
-	_, err = handle.Seek(tail.Offset(), 0)
-	if err != nil {
-		logs.Debug("Can't seek to %d in file: %s", tail.Offset(), path)
-	}
+	tail.seek()
 	return tail
+}
+
+func (tail *Tail) seek() {
+	fi, err := tail.handle.Stat()
+	if err != nil {
+		logs.Error("Can't stat file: %s", err)
+		return
+	}
+	off := tail.Offset()
+	if tail.maxBackfill >= 0 {
+		if off < fi.Size()-tail.maxBackfill {
+			off = fi.Size() - tail.maxBackfill
+		}
+	}
+	_, err = tail.handle.Seek(off, 0)
+	if err != nil {
+		logs.Error("Can't seek file: %s", err)
+		return
+	}
 }
 
 func (tail *Tail) Offset() int64 {
@@ -127,10 +144,7 @@ func (tail *Tail) Poll() {
 				logs.Warn("File truncated, resetting...")
 				atomic.StoreInt64(&tail.offset, 0)
 				tail.WriteOffset()
-				_, err = tail.handle.Seek(0, 0)
-				if err != nil {
-					logs.Warn("Can't seek %s", err)
-				}
+				tail.seek()
 			}
 			return
 		} else if err != nil {
