@@ -38,7 +38,12 @@ The primary YAML file follows a format looks like this:
 
 ```yml
 global:
-  data_directory: [/var/lib/dendrite]
+  # Where we store pointers into the current position of files
+  offset_dir: /var/lib/dendrite
+  
+  # Number of exiting bytes to consume when we observe a new file.  Equivalent 
+  # to tail -n, but with bytes instead of lines.  -1 for unlimited.
+  max_backfill_bytes: 0
   # more keys may be added in later dendrite versions
 sources:
   # ... (usually empty, delegated to the conf.d)
