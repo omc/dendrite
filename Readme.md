@@ -122,6 +122,12 @@ Look in the cookbook directory for more examples.
 
 Join us in our [Dendrite HipChat](https://www.hipchat.com/gKr8c8S4o) room to give feedback and chat about how you might be interested in using and/or contributing.
 
+Ideas:
+
+* Implement a cookbook entry for your favorite log format.
+* [Open issues](https://github.com/onemorecloud/dendrite/issues?state=open)
+* tackle an output protocol/encoding you'd like to see included.
+
 ## Getting Dendrite
 
 For binaries of versioned releases, please look at our [downloads page](https://github.com/onemorecloud/dendrite/blob/master/downloads.md)
