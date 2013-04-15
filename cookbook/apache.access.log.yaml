@@ -6,7 +6,7 @@
 #   "host": "127.0.0.1", 
 #   "client": "-", 
 #   "user": "frank", 
-#   "time": 1349906136, 
+#   "time": 971211336, 
 #   "method": "GET", 
 #   "uri": "/apache_pb.gif", 
 #   "status": 200, 
@@ -15,7 +15,7 @@
 sources:
   apache_access_log:
     glob: /var/log/apache2/access.log
-    pattern: (?P<host>\S+) (?P<client>\S+) (?P<user>\S+) \[(?P<time>[^\]]+)\] "(?P<method>[A-Z]+) (?P<uri>\S+).*" (?P<status>\S+) (?P<bytes>\S+)\n
+    pattern: "(?P<host>\\S+) (?P<client>\\S+) (?P<user>\\S+) \\[(?P<time>[^\\]]+)\\] \"(?P<method>[A-Z]+) (?P<uri>\\S+).*\" (?P<status>\\S+) (?P<bytes>\\S+)\\n"
     fields:
       bytes:
         type: int
@@ -23,4 +23,4 @@ sources:
         type: int
       time:
         type: timestamp
-        format: 2/Jan/2006:15:04:05 -0700
+        format: "_2/Jan/2006:15:04:05 -0700"

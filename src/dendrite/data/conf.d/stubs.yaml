@@ -1,0 +1,14 @@
+sources:
+  solr:
+    glob: src/dendrite/data/solr*
+    pattern: "(?P<line>(?P<severity>[A-Z]+)\: \\[(?P<core>\\w+)\\].*?params=\\{(?P<params>[^}]*)\\}.*hits=(?P<hits>[0-9]+)?.*status=(?P<status>[0-9]+).*QTime=(?P<qtime>[0-9]+)).*\\n"
+    fields: 
+      params:
+        type: tokenized
+        pattern: [^&=]+
+      hits:
+        type: int
+      qtime: 
+        type: int
+      status:
+        type: int

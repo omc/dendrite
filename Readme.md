@@ -12,7 +12,7 @@ If you have a unified log stream, it's easy to build and use tools that consume,
 
 ### Logging is easier than instrumentation.
 
-All applications generate logs. Not all applications are instrumented for metrics. On top of which, there are many disparate instrumentation libraries, such as JMX, StatsD, Metrics, Ostrich, and others.
+All applications generate logs. Not all applications are instrumented for metrics. On top of which, there are many disparate instrumentation libraries, such as JMX, StatsD, Metrics, Ostrich, and others.  We might start polling them laster, if people find this convenient.
 
 Files are easy to read. Extracting metrics and statistics out of log files can be much easier than instrumenting an entire application to emit metrics.
 
