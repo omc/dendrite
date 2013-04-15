@@ -15,8 +15,8 @@ import (
 var configFile = flag.String("f", "/etc/dendrite/config.yaml", "location of the config file")
 var debug = flag.Bool("d", false, "log at DEBUG")
 var logFile = flag.String("l", "/var/log/dendrite.log", "location of the log file")
-var once = flag.Bool("o", false, "don't follow the sources; quit once up-to-date")
 var cpus = flag.Int("c", runtime.NumCPU(), "number of cpus to possibly use")
+var quitAfter = flag.Float64("q", -1, "quit after this many seconds (useful for tests)")
 
 func main() {
 	flag.Parse()
@@ -69,9 +69,15 @@ func main() {
 	// Do the event loop
 	finished := make(chan bool, 0)
 	go dests.Consume(ch, finished)
-	if *once {
+	if *quitAfter >= 0 {
+		start := time.Now()
 		logs.Debug("starting the poll")
-		groups.Poll()
+		for {
+			groups.Poll()
+			if time.Now().Sub(start) >= time.Duration((*quitAfter)*float64(time.Second)) {
+				break
+			}
+		}
 	} else {
 		logs.Debug("starting the loop")
 		groups.Loop()

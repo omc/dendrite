@@ -14,6 +14,20 @@ import (
 	"time"
 )
 
+func bash(str string) {
+	run("bash", "-c", str)
+}
+
+func run(str ...string) {
+	cmd := exec.Command(str[0], str[1:]...)
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+	go io.Copy(os.Stdout, stdout)
+	go io.Copy(os.Stderr, stderr)
+	cmd.Start()
+	cmd.Wait()
+}
+
 func _init(t *testing.T) {
 	os.RemoveAll("tmp")
 	os.Mkdir("tmp", 0777)
@@ -23,15 +37,29 @@ func _init(t *testing.T) {
 	}
 }
 
+func TestTruncation(t *testing.T) {
+	_init(t)
+	bash("cp src/dendrite/data/solr.txt tmp/solr.txt")
+	go func() {
+		time.Sleep(time.Second / 2)
+		bash("cat /dev/null > tmp/solr.txt")
+		bash("cat src/dendrite/data/solr.txt >> tmp/solr.txt")
+	}()
+	run("./dendrite", "-q", "1", "-d", "-f", "src/dendrite/data/truncate.yaml")
+	bytes, err := ioutil.ReadFile("tmp/out.json")
+	if err != nil {
+		t.Error(err)
+	}
+	str := string(bytes)
+	arr := strings.Split(strings.TrimSpace(str), "\n")
+	if len(arr) != 2000 {
+		t.Error(len(arr), "not 2000")
+	}
+}
+
 func TestTcp(t *testing.T) {
 	_init(t)
-	cmd := exec.Command("./dendrite", "-o", "-d", "-f", "src/dendrite/data/conf.yaml")
-	stdout, _ := cmd.StdoutPipe()
-	stderr, _ := cmd.StderrPipe()
-	go io.Copy(os.Stdout, stdout)
-	go io.Copy(os.Stderr, stderr)
-	cmd.Start()
-	cmd.Wait()
+	run("./dendrite", "-q", "0", "-d", "-f", "src/dendrite/data/conf.yaml")
 	bytes, err := ioutil.ReadFile("tmp/out.json")
 	if err != nil {
 		t.Error(err)
@@ -76,7 +104,7 @@ func TestCookbooks(t *testing.T) {
 
 		bytes = rglob.ReplaceAll(bytes, []byte("$1 tmp/foo.log"))
 		ioutil.WriteFile("tmp/conf.d/sub.yaml", bytes, 0777)
-		cmd := exec.Command("./dendrite", "-o", "-d", "-f", "tmp/conf.yaml")
+		cmd := exec.Command("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml")
 		stdout, _ := cmd.StdoutPipe()
 		stderr, _ := cmd.StderrPipe()
 		go io.Copy(os.Stdout, stdout)

@@ -120,6 +120,18 @@ func (tail *Tail) Poll() {
 	for {
 		len, err := tail.handle.Read(buffer)
 		if err == io.EOF {
+			fi, err := tail.handle.Stat()
+			if err != nil {
+				logs.Warn("Can't stat %s", err)
+			} else if fi.Size() < tail.Offset() {
+				logs.Warn("File truncated, resetting...")
+				atomic.StoreInt64(&tail.offset, 0)
+				tail.WriteOffset()
+				_, err = tail.handle.Seek(0, 0)
+				if err != nil {
+					logs.Warn("Can't seek %s", err)
+				}
+			}
 			return
 		} else if err != nil {
 			logs.Debug("read error: ", err)
