@@ -119,13 +119,7 @@ func TestCookbooks(t *testing.T) {
 
 		bytes = rglob.ReplaceAll(bytes, []byte("$1 tmp/foo.log"))
 		ioutil.WriteFile("tmp/conf.d/sub.yaml", bytes, 0777)
-		cmd := exec.Command("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml")
-		stdout, _ := cmd.StdoutPipe()
-		stderr, _ := cmd.StderrPipe()
-		go io.Copy(os.Stdout, stdout)
-		go io.Copy(os.Stderr, stderr)
-		cmd.Start()
-		cmd.Wait()
+    run("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml", "-l", "tmp/test.log")
 
 		var expected map[string]interface{}
 		var actual map[string]interface{}
@@ -137,7 +131,7 @@ func TestCookbooks(t *testing.T) {
 		}
 		for k, _ := range expected {
 			if fmt.Sprintf("%s", actual[k]) != fmt.Sprintf("%s", expected[k]) {
-				t.Error("mismatch on", k, actual[k], expected[k])
+				t.Fatal("mismatch on", k, actual[k], expected[k])
 			}
 		}
 	}
