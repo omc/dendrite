@@ -16,7 +16,7 @@ go-build-all dendrite.go
 git rev-parse HEAD > REVISION
 INCLUDES="cookbook LICENSE Readme.md VERSION REVISION"
 VERSION=`cat VERSION`
-ROOT="http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/"
+ROOT="https://s3.amazonaws.com/dendrite-binaries/"
 
 touch downloads.md
 echo "## $VERSION" > tmp.md
