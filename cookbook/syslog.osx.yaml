@@ -1,0 +1,58 @@
+# -- log line --
+# Apr 16 01:02:12 kyles [0x0-0x22a82a6].com.valvesoftware.steam[6841]: KQ: Error reading KQ:Interrupted system call
+# 
+# -- output --
+# {
+#   "line": "Apr 16 01:02:12 kyles [0x0-0x22a82a6].com.valvesoftware.steam[6841]: KQ: Error reading KQ:Interrupted system call",
+#   "pid": 6841,
+#   "prog": "[0x0-0x22a82a6].com.valvesoftware.steam",
+#   "text": "KQ: Error reading KQ:Interrupted system call",
+#   "tokens": ["KQ","Error","reading","KQ:Interrupted","system","call"],
+#   "tstamp": 1366074132,
+#   "user": "kyles"
+# }
+sources:
+  # a key/name for the service
+  syslog:
+  
+    # Astericks, etc are useful. Syntax is documented at
+    # http://golang.org/pkg/path/filepath/#Match
+    glob: /var/log/system.log
+
+    # The log lines are parsed with a RE2 regex
+    # (https://code.google.com/p/re2/wiki/Syntax). Named matching groups
+    # become columns in the structured output.
+    #
+    # This pattern parses my OS X syslog. Syslog isn't consistent, 
+    # so this may not work on your system.
+    pattern: "(?P<date>.*?:[0-9]+) (?P<user>\\S+) (?P<prog>.+)\\[(?P<pid>\\d+)\\]: (?P<text>.*)"
+    
+    # The output of the regexp can be post-processed. This allows you
+    # to specify type information, etc.
+    #
+    # Current field types are string, date, tokenized, int, timestamp,
+    # as well as gauge, timing, and metric. The last few types are 
+    # specialized integers, and will be treated differently by statsd.
+    fields:
+      # tstamp is the field name in the output.
+      tstamp:
+        # date is the name of the regex match group.
+        name: date
+        type: timestamp
+        format: "Jan _2 15:04:05"
+      line: 
+        # you can match numbered subgroups, in addition to named ones.
+        group: 0
+      tokens: 
+        name: text
+        # this will create an array of the matched tokens.
+        type: tokenized
+        pattern: \S+\b
+      text: 
+        # If there wasn't the tokens field above, this would be 
+        # unneccessary. All named match groups are implicitly turned into 
+        # string fields. However, since I used the "text" match group  
+        # above, the implicit string match no longer exists.
+        type: string
+      pid:
+        type: int
