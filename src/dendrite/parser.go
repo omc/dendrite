@@ -89,6 +89,9 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 				logs.Error("spec group out of range: alias: %s, name: %s, g: %d", spec.Alias, spec.Name, g)
 				panic(-1)
 			}
+			if m[g*2] == -1 {
+				continue
+			}
 			s := string(parser.buffer[m[g*2]:m[g*2+1]])
 			switch spec.Type {
 			case Timestamp:
