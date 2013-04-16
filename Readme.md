@@ -2,7 +2,11 @@
 
 ## Overview
 
-Dendrite scrapes your existing logs, and re-emits the unified log stream in modern, sensible, structured formats, like JSON and StatsD, over common protocols such as TCP(+TLS), UDP, HTTP(S), write(2), or RFC5424 Syslog.
+Dendrite scrapes your existing logs, and re-emits the unified log stream in modern, sensible, structured formats, like JSON and StatsD, over common protocols such as TCP, UDP, files.  SSL/TLS, RFC5424 Syslog, HTTP, etc should be coming soon (Want to contribute?).
+
+## Use cases
+
+* Send metrics from your logs to StatsD
 
 ## Why Dendrite?
 
