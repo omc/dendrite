@@ -124,8 +124,12 @@ destinations:
   tmp: "file+json:///tmp/json.log"
 ```
 
-
 Look in the cookbook directory for more examples.
+
+## Getting Started
+
+1. Download the latest binary for your system from our [downloads page](https://github.com/onemorecloud/dendrite/blob/master/downloads.md).
+2. Walk through the  [tutorial](https://github.com/onemorecloud/dendrite/blob/master/tutorial.md).
 
 ## Contributing
 
@@ -136,7 +140,3 @@ Ideas:
 * Implement a cookbook entry for your favorite log format.
 * [Open issues](https://github.com/onemorecloud/dendrite/issues?state=open)
 * tackle an output protocol/encoding you'd like to see included.
-
-## Getting Dendrite
-
-For binaries of versioned releases, please look at our [downloads page](https://github.com/onemorecloud/dendrite/blob/master/downloads.md)
