@@ -53,7 +53,7 @@ func (group *TailGroup) activate(match string) {
 	tail, ok := group.Tails[match]
 	if !ok {
 		base := path.Base(match)
-		offset := group.OffsetDir + "/" + base + ".ptr"
+		offset := path.Join(group.OffsetDir, base+".ptr")
 		tail = NewTail(group.NewParser(base), group.maxBackfill, match, offset)
 		group.Tails[match] = tail
 	}

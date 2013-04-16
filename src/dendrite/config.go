@@ -126,6 +126,11 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 	}
 
 	config.OffsetDir, err = getString(global, "offset_dir")
+	if err != nil {
+		logs.Warn("no offset_dir specified")
+		config.MaxBackfillBytes = -1
+	}
+
 	config.MaxBackfillBytes, err = getInt64(global, "max_backfill_bytes")
 	if err != nil {
 		logs.Warn("no max_backfill_bytes, continuing with unlimited")

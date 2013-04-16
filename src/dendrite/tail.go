@@ -81,7 +81,7 @@ func (tail *Tail) Offset() int64 {
 }
 
 func (tail *Tail) WriteOffset() {
-	path := os.TempDir() + path.Base(tail.OffsetPath)
+	path := path.Join(os.TempDir(), path.Base(tail.OffsetPath))
 	temp, err := os.Create(path)
 	if err != nil {
 		logs.Debug("Can't create tempfile:", err)
