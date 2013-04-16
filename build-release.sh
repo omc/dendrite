@@ -1,14 +1,20 @@
 #!/bin/bash
+# set -ex
 cd `dirname $0`
 rm -rf dist
 mkdir -p dist
 
-export GOROOT=~/workspace/golang-trunk
+GOROOT=~/workspace/golang-trunk
+PATH=~/workspace/golang-trunk/bin:$PATH
+GOPATH=/tmp/gp
+rm -rf $GOPATH
+mkdir -p $GOPATH/src $GOPATH/bin $GOPATH/pkg
 source ~/workspace/golang-crosscompile/crosscompile.bash
 
+go-all get
 go-build-all dendrite.go
-
-INCLUDES="cookbook LICENSE Readme.md VERSION"
+git rev-parse HEAD > REVISION
+INCLUDES="cookbook LICENSE Readme.md VERSION REVISION"
 VERSION=`cat VERSION`
 ROOT="http://dendrite-binaries.s3-website-us-east-1.amazonaws.com/"
 
@@ -61,4 +67,3 @@ cat tmp.md tmp2.md > downloads.md
 rm tmp*.md
 markdown downloads.md > dist/index.html
 
-s3cmd sync dist/. s3://dendrite-binaries
