@@ -187,12 +187,16 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 			field.Group, err = getInt(fld, "group")
 
 			s, err := getString(fld, "type")
-			field.Type, err = parseField(s)
 			if err != nil {
-				logs.Warn("Invalid field type: %s, continuing... (error was %s)", s, err)
-				continue
+				field.Type = String
+			} else {
+				field.Type, err = parseField(s)
+				if err != nil {
+					logs.Warn("Invalid field type: %s, continuing... (error was %s)", s, err)
+					continue
+				}
 			}
-			logs.Info("found type %s", s)
+			logs.Info("found type %s", field.Type)
 
 			field.Format, err = getString(fld, "format")
 
