@@ -119,7 +119,7 @@ func TestCookbooks(t *testing.T) {
 
 		bytes = rglob.ReplaceAll(bytes, []byte("$1 tmp/foo.log"))
 		ioutil.WriteFile("tmp/conf.d/sub.yaml", bytes, 0777)
-    run("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml", "-l", "tmp/test.log")
+		run("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml", "-l", "tmp/test.log")
 
 		var expected map[string]interface{}
 		var actual map[string]interface{}
