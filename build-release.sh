@@ -14,7 +14,7 @@ source ~/workspace/golang-crosscompile/crosscompile.bash
 go-all get
 go-build-all dendrite.go
 git rev-parse HEAD > REVISION
-INCLUDES="cookbook LICENSE Readme.md VERSION REVISION"
+INCLUDES="cookbook LICENSE Readme.md tutorial.md VERSION REVISION"
 VERSION=`cat VERSION`
 ROOT="https://s3.amazonaws.com/dendrite-binaries/"
 
