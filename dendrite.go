@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./src/dendrite"
+	"github.com/onemorecloud/dendrite/src/dendrite"
 	"bufio"
 	"flag"
 	"github.com/fizx/logs"
