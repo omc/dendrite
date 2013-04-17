@@ -26,10 +26,12 @@ type RegexpParser struct {
 	buffer   []byte
 	fields   []FieldConfig
 	file     string
+	hostname string
 }
 
-func NewRegexpParser(group string, file string, output chan Record, pattern string, fields []FieldConfig) Parser {
+func NewRegexpParser(hostname string, group string, file string, output chan Record, pattern string, fields []FieldConfig) Parser {
 	parser := new(RegexpParser)
+	parser.hostname = hostname
 	parser.file = file
 	parser.group = group
 	parser.output = output
@@ -83,6 +85,7 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 		out["_file"] = Column{String, parser.file}
 		out["_time"] = Column{Timestamp, StandardTimeProvider.Now().Unix()}
 		out["_group"] = Column{String, parser.group}
+		out["_hostname"] = Column{String, parser.hostname}
 		for _, spec := range parser.fields {
 			g := spec.Group
 			if g < 0 || g > len(m)/2 {

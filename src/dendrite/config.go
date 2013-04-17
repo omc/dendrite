@@ -41,6 +41,7 @@ type SourceConfig struct {
 	Fields           []FieldConfig
 	Name             string
 	OffsetDir        string
+	Hostname         string
 	MaxBackfillBytes int64
 }
 
@@ -79,12 +80,12 @@ func (config *Config) CreateAllTailGroups(drain chan Record) TailGroups {
 }
 
 // Mostly delegate
-func NewConfig(configFile string) (*Config, error) {
+func NewConfig(configFile string, hostname string) (*Config, error) {
 	mapping, err := assembleConfigFiles(configFile)
 	if err != nil {
 		return nil, err
 	}
-	return configFromMapping(mapping)
+	return configFromMapping(mapping, hostname)
 }
 
 func assembleConfigFiles(configFile string) (map[string]interface{}, error) {
@@ -112,7 +113,7 @@ func assembleConfigFiles(configFile string) (map[string]interface{}, error) {
 	return mapping, nil
 }
 
-func configFromMapping(mapping map[string]interface{}) (*Config, error) {
+func configFromMapping(mapping map[string]interface{}, hostname string) (*Config, error) {
 	b, _ := json.Marshal(mapping)
 	logs.Debug("mapping: %s", string(b))
 	var err error = nil
@@ -150,6 +151,7 @@ func configFromMapping(mapping map[string]interface{}) (*Config, error) {
 		}
 
 		var source SourceConfig
+		source.Hostname = hostname
 		source.Fields = make([]FieldConfig, 0)
 		source.OffsetDir = config.OffsetDir
 		source.MaxBackfillBytes = config.MaxBackfillBytes

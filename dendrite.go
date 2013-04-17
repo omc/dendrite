@@ -16,6 +16,7 @@ var configFile = flag.String("f", "/etc/dendrite/config.yaml", "location of the 
 var debug = flag.Bool("d", false, "log at DEBUG")
 var logFile = flag.String("l", "/var/log/dendrite.log", "location of the log file")
 var cpus = flag.Int("c", runtime.NumCPU(), "number of cpus to possibly use")
+var name = flag.String("n", "unknown", "override the system value of hostname")
 var quitAfter = flag.Float64("q", -1, "quit after this many seconds (useful for tests)")
 
 func main() {
@@ -38,8 +39,15 @@ func main() {
 		logs.SetLevel(logs.INFO)
 	}
 
+	if *name == "unknown" {
+		*name, err = os.Hostname()
+		if err != nil {
+			logs.Warn("Unable to determine hostname: %s", err)
+		}
+	}
+
 	// Read the config files
-	config, err := dendrite.NewConfig(*configFile)
+	config, err := dendrite.NewConfig(*configFile, *name)
 	if err != nil {
 		logs.Fatal("Can't read configuration: %s", err)
 	}

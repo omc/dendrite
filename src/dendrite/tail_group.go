@@ -15,6 +15,7 @@ type TailGroup struct {
 	Pattern   string
 	OffsetDir string
 	Name      string
+	Hostname  string
 	Tails     map[string]*Tail
 
 	output      chan Record
@@ -37,6 +38,7 @@ func (groups *TailGroups) Poll() {
 
 func NewTailGroup(config SourceConfig, output chan Record) *TailGroup {
 	group := new(TailGroup)
+	group.Hostname = config.Hostname
 	group.output = output
 	group.Name = config.Name
 	group.Glob = config.Glob
@@ -60,7 +62,7 @@ func (group *TailGroup) activate(match string) {
 }
 
 func (group *TailGroup) NewParser(file string) Parser {
-	return NewRegexpParser(group.Name, file, group.output, group.Pattern, group.fields)
+	return NewRegexpParser(group.Hostname, group.Name, file, group.output, group.Pattern, group.fields)
 }
 
 func (group *TailGroup) deactivate(match string) {
