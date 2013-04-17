@@ -19,15 +19,15 @@ var parser Parser
 var offsetFile string
 var tail *Tail
 var output chan Record
-var line = "{\"_file\":{\"Type\":0,\"Value\":\"solr.txt\"},\"_group\":{\"Type\":0,\"Value\":\"foo\"},\"_offset\":{\"Type\":2,\"Value\":0},\"_time\":{\"Type\":6,\"Value\":1234567890},\"line\":{\"Type\":0,\"Value\":\"INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1\"}}"
+var line = "{\"_file\":{\"Type\":0,\"Value\":\"solr.txt\"},\"_group\":{\"Type\":0,\"Value\":\"foo\"},\"_hostname\":{\"Type\":0,\"Value\":\"host.local\"},\"_offset\":{\"Type\":2,\"Value\":0},\"_time\":{\"Type\":6,\"Value\":1234567890},\"line\":{\"Type\":0,\"Value\":\"INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1\"}}"
 
 func _tail_init() {
 	StandardTimeProvider = new(FixedTimeProvider)
 	output = make(chan Record, 100)
 	offsetFile = os.TempDir() + "test.txt"
 	_ = os.Remove(offsetFile)
-	parser = NewRegexpParser("foo", "solr.txt", output, "(?P<line>.+)\n", nil)
-	tail = NewTail(parser, "data/solr.txt", offsetFile)
+	parser = NewRegexpParser("host.local", "foo", "solr.txt", output, "(?P<line>.+)\n", nil)
+	tail = NewTail(parser, -1, "data/solr.txt", offsetFile)
 }
 
 func TestStartsAtZero(t *testing.T) {
@@ -40,7 +40,7 @@ func TestStartsAtZero(t *testing.T) {
 func TestStartsAtOffset(t *testing.T) {
 	_tail_init()
 	ioutil.WriteFile(offsetFile, []byte("747\n"), 0777)
-	tail = NewTail(parser, "data/solr.txt", offsetFile)
+	tail = NewTail(parser, -1, "data/solr.txt", offsetFile)
 	if tail.Offset() != 747 {
 		t.Errorf("initial offset was %d, not 747", tail.Offset())
 	}
