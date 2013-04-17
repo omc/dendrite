@@ -1,4 +1,9 @@
 # Dendrite Manifesto
+
+> Are you looking for [downloads](https://github.com/onemorecloud/dendrite/blob/master/downloads.md),
+> [a tutorial](https://github.com/onemorecloud/dendrite/blob/master/tutorial.md),
+> or the [readme](https://github.com/onemorecloud/dendrite#readme)? &lt;/clippy>
+
  
 We're running two search platfoms now--websolr.com and bonsai.io.  We host a bunch of people's search engines, and those search engines generate a whole bunch of logs.  And we do stuff with them.  We'll get paged if specific things show up in the garbage collection logs.  We have cron jobs that curl individual customer's search engines, and record the latencies.  We have a bunch of traditional monit-like alerts as well, on disk usage, memory, responsiveness on a port, etc.  Things like that.  But there's so much more we could do.
  

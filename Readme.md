@@ -1,12 +1,13 @@
 # Dendrite
 
+> Are you looking for [downloads](https://github.com/onemorecloud/dendrite/blob/master/downloads.md),
+> [a tutorial](https://github.com/onemorecloud/dendrite/blob/master/tutorial.md),
+> or the [manifesto](https://github.com/onemorecloud/dendrite/blob/master/manifesto.md)? &lt;/clippy>
+
+
 ## Overview
 
 Dendrite scrapes your existing logs, and re-emits the unified log stream in modern, sensible, structured formats, like JSON and StatsD, over common protocols such as TCP, UDP, files.  SSL/TLS, RFC5424 Syslog, HTTP, etc should be coming soon (Want to contribute?).
-
-## Use cases
-
-* Send metrics from your logs to StatsD
 
 ## Why Dendrite?
 
