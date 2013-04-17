@@ -134,7 +134,7 @@ Look in the cookbook directory for more examples.
 
 ## Contributing
 
-Join us in our [Dendrite HipChat](https://www.hipchat.com/gKr8c8S4o) room to give feedback and chat about how you might be interested in using and/or contributing.
+Join us in our [Google Group](https://groups.google.com/group/dendrite-talk) or [HipChat](https://www.hipchat.com/gKr8c8S4o) room to give feedback and chat about how you might be interested in using and/or contributing.
 
 Ideas:
 
