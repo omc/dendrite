@@ -15,11 +15,6 @@ import (
 	"time"
 )
 
-var tr = &http.Transport{
-	TLSClientConfig:    nil,
-	DisableCompression: true,
-}
-
 type noOpReader struct{}
 type rwStruct struct {
 	io.Reader
