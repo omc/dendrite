@@ -15,6 +15,7 @@ type Encoder interface {
 type JsonEncoder struct{}
 type StatsdEncoder struct{}
 type RawStringEncoder struct{}
+type LibratoEncoder struct{}
 
 func NewEncoder(u *url.URL) (Encoder, error) {
 	a := strings.Split(u.Scheme, "+")
@@ -23,6 +24,8 @@ func NewEncoder(u *url.URL) (Encoder, error) {
 		return new(JsonEncoder), nil
 	case "statsd":
 		return new(StatsdEncoder), nil
+	case "librato":
+		return new(LibratoEncoder), nil
 	}
 	return new(RawStringEncoder), nil
 }
@@ -46,6 +49,23 @@ func (*JsonEncoder) Encode(out map[string]Column, writer io.Writer) {
 	}
 	bytes = append(bytes, '\n')
 	writer.Write(bytes)
+}
+
+func (*LibratoEncoder) Encode(out map[string]Column, writer io.Writer) {
+	m := make(map[string]interface{})
+	m["source"] = out["_hostname"].Value
+	for k, v := range out {
+		switch v.Type {
+		case Gauge:
+			m["name"] = k
+			m["value"] = v.Value
+			bytes, err := json.Marshal(m)
+			if err != nil {
+				panic(err)
+			}
+			writer.Write(bytes)
+		}
+	}
 }
 
 func (*StatsdEncoder) Encode(out map[string]Column, writer io.Writer) {
