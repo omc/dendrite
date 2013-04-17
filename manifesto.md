@@ -29,9 +29,9 @@ That's a lot of things to keep running.  Wouldn't you like to know if you've got
 
 So what we'd like to have is a daemon sitting on your system, aggregating all of your logs, parsing them into a common, useful format.  Then you could ship that data to Statsd/Graphite, Papertrail, logstash, greylog2, Elasticsearch, Splunk, a Mongo table, that in-house hacky thing, etc.  For us, we're going to use Graphite, StatsD, and we're going to pipe it into a websockets api we wrote.  People come up with great stuff for this all the time.
 
-    Side note: I love the idea of using @cantino's Huginn for easy-to-write
-    custom agents that do peak-detection and send email, etc.  It could be
-    like a roll-my-own PagerDuty with weak AI.  New stuff every week.
+> Side note: I love the idea of using @cantino's Huginn for easy-to-write
+> custom agents that do peak-detection and send email, etc.  It could be
+> like a roll-my-own PagerDuty with weak AI.  New stuff every week.
 
 Ideally, this daemon should only consume a few megabytes of memory, it should have minimal dependencies, it should be efficient.  The common open source agents for this stuff are written in Java, and depend on not only the Java dependencies, but random C deps like libtokyocabinet.  Sorry, not simple enough, and I'd like to use that -Xmx256M of RAM for my applications (and not worry about GC thrashing killing my cpu utilization).
 
