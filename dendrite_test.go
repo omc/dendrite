@@ -95,43 +95,50 @@ func TestTcp(t *testing.T) {
 }
 
 func TestCookbooks(t *testing.T) {
+	sentinel := "# -- log line --\n"
 	rglob := regexp.MustCompile("(\n[ ]+glob:).*")
-	rlog := regexp.MustCompile("# -- log line --\\s*# (.*)")
-	rout := regexp.MustCompile("(?s)# -- output --\\s*# (.+?)\n[^#]")
+	rlog := regexp.MustCompile("# (.*)")
+	rout := regexp.MustCompile("(?s)# -- output --.*?# (.+?# })")
 	matches, _ := filepath.Glob("cookbook/*.yaml")
 	for _, m := range matches {
-		os.RemoveAll("tmp")
-		os.Mkdir("tmp", 0777)
-		os.Mkdir("tmp/conf.d", 0777)
-		exec.Command("cp", "src/dendrite/data/conf.yaml", "tmp").Run()
-
 		bytes, err := ioutil.ReadFile(m)
 		if err != nil {
 			t.Fatal("can't open", m)
 		}
 
-		log := rlog.FindStringSubmatch(string(bytes))[1]
-		fmt.Println(string(log))
-		out := rout.FindStringSubmatch(string(bytes))[1]
-		out = strings.Replace(out, "\n#", " ", -1)
+		strs := strings.Split(string(bytes), sentinel)
+		for i, str := range strs {
+			if i == 0 {
+				continue
+			}
 
-		ioutil.WriteFile("tmp/foo.log", []byte(log+"\n"), 0777)
+			os.RemoveAll("tmp")
+			os.Mkdir("tmp", 0777)
+			os.Mkdir("tmp/conf.d", 0777)
+			exec.Command("cp", "src/dendrite/data/conf.yaml", "tmp").Run()
 
-		bytes = rglob.ReplaceAll(bytes, []byte("$1 tmp/foo.log"))
-		ioutil.WriteFile("tmp/conf.d/sub.yaml", bytes, 0777)
-		run("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml", "-l", "tmp/test.log")
+			log := rlog.FindStringSubmatch(str)[1]
+			out := rout.FindStringSubmatch(str)[1]
+			out = strings.Replace(out, "\n#", " ", -1)
 
-		var expected map[string]interface{}
-		var actual map[string]interface{}
-		json.Unmarshal([]byte(out), &expected)
-		actualBytes, _ := ioutil.ReadFile("tmp/out.json")
-		json.Unmarshal(actualBytes, &actual)
-		if len(expected) == 0 {
-			t.Error("malformatted expect")
-		}
-		for k, _ := range expected {
-			if fmt.Sprintf("%s", actual[k]) != fmt.Sprintf("%s", expected[k]) {
-				t.Fatal("mismatch on", k, actual[k], expected[k])
+			ioutil.WriteFile("tmp/foo.log", []byte(log+"\n"), 0777)
+
+			bytes = rglob.ReplaceAll(bytes, []byte("$1 tmp/foo.log"))
+			ioutil.WriteFile("tmp/conf.d/sub.yaml", bytes, 0777)
+			run("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml", "-l", "tmp/test.log")
+
+			var expected map[string]interface{}
+			var actual map[string]interface{}
+			json.Unmarshal([]byte(out), &expected)
+			actualBytes, _ := ioutil.ReadFile("tmp/out.json")
+			json.Unmarshal(actualBytes, &actual)
+			if len(expected) == 0 {
+				t.Error("malformatted expect")
+			}
+			for k, _ := range expected {
+				if fmt.Sprintf("%s", actual[k]) != fmt.Sprintf("%s", expected[k]) {
+					t.Fatal("mismatch on", k, "[", actual[k], "]", "[", expected[k], "]")
+				}
 			}
 		}
 	}

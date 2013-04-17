@@ -11,6 +11,20 @@
 #   "status": 0,
 #   "qtime": 1
 # }
+#
+# -- log line --
+# INFO: [1234567898765] webapp=/solr path=/update params={wt=ruby} status=0 QTime=1
+#
+# -- output --
+# {
+#   "line": "INFO: [1234567898765] webapp=/solr path=/update params={wt=ruby} status=0 QTime=1", 
+#   "severity": "INFO", 
+#   "core": "1234567898765", 
+#   "params": ["wt", "ruby"], 
+#   "status": 0,
+#   "qtime": 1
+# }
+#
 sources:
   solr:
     glob: /var/log/tomcat6/catalina*log
