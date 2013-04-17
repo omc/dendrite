@@ -85,7 +85,7 @@ func NewTCPReadWriter(u *url.URL) (io.ReadWriter, error) {
 
 func NewLibratoReadWriter(u *url.URL) (io.ReadWriter, error) {
 	rw := new(libratoStruct)
-	rw.url = u
+	rw.url, _ = url.Parse(u.String())
 	rw.url.Scheme = "https"
 	rw.metrics = make(chan []byte, 1000)
 	rw.responses = make(chan string, 1000)
@@ -95,35 +95,52 @@ func NewLibratoReadWriter(u *url.URL) (io.ReadWriter, error) {
 
 func (rw *libratoStruct) Loop() {
 	var msg []byte
-	limit := 300
+	limit := 100
 	msgs := make([][]byte, 0, limit)
+	i := 0
 	for {
-		select {
-		case msg = <-rw.metrics:
-			msgs = append(msgs, msg)
-			continue
-		default:
-			if len(msgs) > 0 {
-				rw.Send(msgs)
-				msgs = msgs[0:0]
+		if i < limit {
+			select {
+			case msg = <-rw.metrics:
+				msgs = append(msgs, msg)
+				i += 1
+				continue
+			default:
 			}
 		}
-		time.Sleep(time.Second / 10)
+		if len(msgs) > 0 {
+			rw.Send(msgs)
+			msgs = msgs[0:0]
+			i = 0
+		}
+		time.Sleep(time.Second)
 	}
 }
 
 func (rw *libratoStruct) Send(msgs [][]byte) {
 	body := "{\"gauges\": [" + string(bytes.Join(msgs, []byte(","))) + "]}"
-	resp, err := http.Post(rw.url.String(), "application/json", bytes.NewBufferString(body))
+	logs.Info("Sending %d messages to librato: %s", len(msgs), rw.url.String())
+	client := http.DefaultClient
+	req, err := http.NewRequest("POST", "https://metrics-api.librato.com/v1/metrics", bytes.NewBufferString(body))
 	if err != nil {
 		logs.Error("error on http request: %s", err)
 	} else {
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		user := rw.url.User.Username()
+		pass, _ := rw.url.User.Password()
+		req.SetBasicAuth(user, pass)
+		req.Header.Add("Content-type", "application/json")
+		resp, err := client.Do(req)
 		if err != nil {
-			logs.Error("error reading http response: %s", err)
+			logs.Error("error on http response: %s", err)
 		} else {
-			rw.responses <- resp.Status + "\n" + string(body)
+			logs.Info(resp.Status)
+			defer resp.Body.Close()
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				logs.Error("error reading http response: %s", err)
+			} else {
+				rw.responses <- resp.Status + "\n" + string(body)
+			}
 		}
 	}
 }
