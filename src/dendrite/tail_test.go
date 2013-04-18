@@ -26,7 +26,7 @@ func _tail_init() {
 	output = make(chan Record, 100)
 	offsetFile = os.TempDir() + "test.txt"
 	_ = os.Remove(offsetFile)
-	parser = NewRegexpParser("host.local", "foo", "solr.txt", output, "(?P<line>.+)\n", nil)
+	parser = NewRegexpParser("host.local", "foo", "solr.txt", output, "(?P<line>.+)\n", nil, 32768)
 	tail = NewTail(parser, -1, "data/solr.txt", offsetFile)
 }
 

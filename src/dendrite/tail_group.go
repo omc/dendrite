@@ -21,6 +21,7 @@ type TailGroup struct {
 	output      chan Record
 	fields      []FieldConfig
 	maxBackfill int64
+	maxLineSize int64
 }
 
 func (groups *TailGroups) Loop() {
@@ -46,6 +47,7 @@ func NewTailGroup(config SourceConfig, output chan Record) *TailGroup {
 	group.OffsetDir = config.OffsetDir
 	group.Tails = make(map[string]*Tail)
 	group.fields = config.Fields
+	group.maxLineSize = config.MaxLineSizeBytes
 	group.maxBackfill = config.MaxBackfillBytes
 	group.Refresh()
 	return group
@@ -62,7 +64,7 @@ func (group *TailGroup) activate(match string) {
 }
 
 func (group *TailGroup) NewParser(file string) Parser {
-	return NewRegexpParser(group.Hostname, group.Name, file, group.output, group.Pattern, group.fields)
+	return NewRegexpParser(group.Hostname, group.Name, file, group.output, group.Pattern, group.fields, group.maxLineSize)
 }
 
 func (group *TailGroup) deactivate(match string) {

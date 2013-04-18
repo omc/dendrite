@@ -5,12 +5,28 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 )
+
+func bash(str string) {
+	run("bash", "-c", str)
+}
+
+func run(str ...string) {
+	cmd := exec.Command(str[0], str[1:]...)
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+	go io.Copy(os.Stdout, stdout)
+	go io.Copy(os.Stderr, stderr)
+	cmd.Start()
+	cmd.Wait()
+}
 
 func _init(t *testing.T) {
 	os.RemoveAll("tmp")
@@ -53,6 +69,30 @@ func TestBackfill(t *testing.T) {
 	arr := strings.Split(strings.TrimSpace(str), "\n")
 	if len(arr) != (600 / 130) {
 		t.Error(len(arr), "not", (600 / 130))
+	}
+}
+
+func TestGettingDataWithJunk(t *testing.T) {
+	_init(t)
+	bash("cp src/dendrite/data/junk.yaml tmp")
+	bash("cat src/dendrite/data/solr3.txt.gz | gunzip > tmp/solr.txt")
+	run("./dendrite", "-q", "0", "-d", "-f", "tmp/junk.yaml")
+	bytes, err := ioutil.ReadFile("tmp/out.json")
+	if err != nil {
+		t.Error(err)
+	}
+	str := string(bytes)
+	arr := strings.Split(strings.TrimSpace(str), "\n")
+	if len(arr) != 1 {
+		t.Fatal(len(arr), "not 1")
+	}
+	m := make(map[string]interface{})
+	err = json.Unmarshal([]byte(arr[0]), &m)
+	if err != nil {
+		t.Error(err)
+	}
+	if m["qtime"] != 1.0 {
+		t.Error(m["qtime"], "wasn't a numeric 1 ")
 	}
 }
 

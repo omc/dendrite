@@ -20,17 +20,19 @@ type Parser interface {
 }
 
 type RegexpParser struct {
-	group    string
-	compiled *regexp.Regexp
-	output   chan Record
-	buffer   []byte
-	fields   []FieldConfig
-	file     string
-	hostname string
+	group       string
+	compiled    *regexp.Regexp
+	output      chan Record
+	buffer      []byte
+	fields      []FieldConfig
+	file        string
+	hostname    string
+	maxLineSize int
 }
 
-func NewRegexpParser(hostname string, group string, file string, output chan Record, pattern string, fields []FieldConfig) Parser {
+func NewRegexpParser(hostname string, group string, file string, output chan Record, pattern string, fields []FieldConfig, maxLineSize int64) Parser {
 	parser := new(RegexpParser)
+	parser.maxLineSize = int(maxLineSize)
 	parser.hostname = hostname
 	parser.file = file
 	parser.group = group
@@ -74,6 +76,13 @@ func NewRegexpParser(hostname string, group string, file string, output chan Rec
 func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 	parser.buffer = append(parser.buffer, bytes...)
 	logs.Debug("consuming %d bytes of %s", len(bytes), parser.file)
+	l := len(parser.buffer)
+	if l > parser.maxLineSize {
+		off := l - parser.maxLineSize
+		logs.Debug("chopping %d bytes off buffer (was: %d, max: %d)", off, l, parser.maxLineSize)
+		atomic.AddInt64(counter, int64(off))
+		parser.buffer = parser.buffer[off:]
+	}
 	for {
 		m := parser.compiled.FindSubmatchIndex(parser.buffer)
 		if m == nil {
