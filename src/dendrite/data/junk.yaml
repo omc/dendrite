@@ -1,5 +1,7 @@
 global: 
   offset_dir: tmp
+  max_backfill_bytes: 100000000
+  max_linesize_bytes: 32768
 destinations:
   json: "file+json://tmp/out.json"
 sources:
