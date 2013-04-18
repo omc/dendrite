@@ -4,8 +4,24 @@ import (
 	"fmt"
 	"github.com/kylelemons/go-gypsy/yaml"
 	"io"
+	"os"
+	"os/exec"
 	"strconv"
 )
+
+func bash(str string) {
+	run("bash", "-c", str)
+}
+
+func run(str ...string) {
+	cmd := exec.Command(str[0], str[1:]...)
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+	go io.Copy(os.Stdout, stdout)
+	go io.Copy(os.Stderr, stderr)
+	cmd.Start()
+	cmd.Wait()
+}
 
 func Unescape(in string) string {
 	bytes := []byte(in)

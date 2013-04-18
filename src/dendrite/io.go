@@ -2,6 +2,7 @@ package dendrite
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"net"
 	"net/url"
@@ -13,6 +14,12 @@ type noOpReader struct{}
 type rwStruct struct {
 	io.Reader
 	io.Writer
+	io.Closer
+}
+
+type closeStruct struct {
+	w *bufio.Writer
+	c net.Conn
 }
 
 var EmptyReader = new(noOpReader)
@@ -21,11 +28,12 @@ func (er *noOpReader) Read(p []byte) (n int, err error) {
 	return 0, io.EOF
 }
 
-func NewReadWriter(u *url.URL) (io.ReadWriter, error) {
+func NewReadWriter(u *url.URL) (io.ReadWriteCloser, error) {
 	protocol := strings.Split(u.Scheme, "+")[0]
 	switch protocol {
 	case "file":
-		return NewFileReadWriter(u.Host + "/" + u.Path)
+		realPath := u.Host + "/" + u.Path
+		return NewFileReadWriter(strings.TrimRight(realPath, "/"))
 	case "udp":
 		return NewUDPReadWriter(u)
 	case "tcp":
@@ -40,26 +48,34 @@ func NewReadWriter(u *url.URL) (io.ReadWriter, error) {
 	return nil, nil //unreached
 }
 
-func NewFileReadWriter(path string) (io.ReadWriter, error) {
+func NewFileReadWriter(path string) (io.ReadWriteCloser, error) {
+	fmt.Println(path)
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
 	if err != nil {
 		return nil, err
 	}
-	return &rwStruct{EmptyReader, file}, nil
+	return &rwStruct{EmptyReader, file, file}, nil
 }
 
-func NewUDPReadWriter(u *url.URL) (io.ReadWriter, error) {
-	conn, err := net.Dial(u.Scheme, u.Host)
+func NewUDPReadWriter(u *url.URL) (io.ReadWriteCloser, error) {
+	conn, err := net.Dial("udp", u.Host)
 	if err != nil {
 		return nil, err
 	}
-	return &rwStruct{EmptyReader, conn}, nil
+	return &rwStruct{EmptyReader, conn, conn}, nil
 }
 
-func NewTCPReadWriter(u *url.URL) (io.ReadWriter, error) {
-	conn, err := net.Dial(u.Scheme, u.Host)
+func (cs *closeStruct) Close() error {
+	cs.w.Flush()
+	return cs.c.Close()
+}
+
+func NewTCPReadWriter(u *url.URL) (io.ReadWriteCloser, error) {
+	conn, err := net.Dial("tcp", u.Host)
 	if err != nil {
 		return nil, err
 	}
-	return &rwStruct{bufio.NewReader(conn), bufio.NewWriter(conn)}, nil
+	r := bufio.NewReader(conn)
+	w := bufio.NewWriter(conn)
+	return &rwStruct{r, w, &closeStruct{w, conn}}, nil
 }

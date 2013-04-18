@@ -5,28 +5,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 )
-
-func bash(str string) {
-	run("bash", "-c", str)
-}
-
-func run(str ...string) {
-	cmd := exec.Command(str[0], str[1:]...)
-	stdout, _ := cmd.StdoutPipe()
-	stderr, _ := cmd.StderrPipe()
-	go io.Copy(os.Stdout, stdout)
-	go io.Copy(os.Stderr, stderr)
-	cmd.Start()
-	cmd.Wait()
-}
 
 func _init(t *testing.T) {
 	os.RemoveAll("tmp")
