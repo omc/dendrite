@@ -3,7 +3,6 @@ package dendrite
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fizx/logs"
 	"io"
 	"net/url"
 	"strings"

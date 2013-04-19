@@ -4,3 +4,4 @@ tmp
 dendrite-*
 /tmp*
 REVISION
+tmp.out

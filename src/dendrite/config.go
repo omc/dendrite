@@ -43,6 +43,7 @@ type SourceConfig struct {
 	OffsetDir        string
 	Hostname         string
 	MaxBackfillBytes int64
+	MaxLineSizeBytes int64
 }
 
 type DestinationConfig struct {
@@ -53,6 +54,7 @@ type DestinationConfig struct {
 type Config struct {
 	OffsetDir        string
 	MaxBackfillBytes int64
+	MaxLineSizeBytes int64
 	Destinations     []DestinationConfig
 	Sources          []SourceConfig
 }
@@ -138,6 +140,12 @@ func configFromMapping(mapping map[string]interface{}, hostname string) (*Config
 		config.MaxBackfillBytes = -1
 	}
 
+	config.MaxLineSizeBytes, err = getInt64(global, "max_linesize_bytes")
+	if err != nil {
+		logs.Warn("no max_linesize_bytes, continuing with 32768")
+		config.MaxLineSizeBytes = 32768
+	}
+
 	sources, err := getMap(mapping, "sources")
 	if err != nil {
 		return nil, fmt.Errorf("no sources section in the config file")
@@ -155,6 +163,8 @@ func configFromMapping(mapping map[string]interface{}, hostname string) (*Config
 		source.Fields = make([]FieldConfig, 0)
 		source.OffsetDir = config.OffsetDir
 		source.MaxBackfillBytes = config.MaxBackfillBytes
+		source.MaxLineSizeBytes = config.MaxLineSizeBytes
+		source.Name = name
 		source.Glob, err = getString(src, "glob")
 		if err != nil {
 			return nil, err
