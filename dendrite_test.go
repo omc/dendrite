@@ -94,6 +94,9 @@ func TestGettingDataWithJunk(t *testing.T) {
 	if m["qtime"] != 1.0 {
 		t.Error(m["qtime"], "wasn't a numeric 1 ")
 	}
+	if m["_group"] == "" || m["_group"] == nil {
+		t.Error("group was empty")
+	}
 }
 
 func TestTcp(t *testing.T) {

@@ -164,6 +164,7 @@ func configFromMapping(mapping map[string]interface{}, hostname string) (*Config
 		source.OffsetDir = config.OffsetDir
 		source.MaxBackfillBytes = config.MaxBackfillBytes
 		source.MaxLineSizeBytes = config.MaxLineSizeBytes
+		source.Name = name
 		source.Glob, err = getString(src, "glob")
 		if err != nil {
 			return nil, err
