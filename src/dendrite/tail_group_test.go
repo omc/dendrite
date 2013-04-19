@@ -34,6 +34,23 @@ func TestGroupHasTails(t *testing.T) {
 	}
 }
 
+func TestRefreshPicksUpFiles(t *testing.T) {
+	_tg_init()
+	bash("rm -f data/solrN.txt")
+	n := len(group.Tails)
+	if n != 2 {
+		t.Errorf("group has %d tails", n)
+	}
+	bash("touch data/solrN.txt")
+	group.Refresh()
+	n = len(group.Tails)
+	if n != 3 {
+		t.Errorf("group has %d tails", n)
+	}
+
+	bash("rm -f data/solrN.txt")
+}
+
 func TestGroupCanPoll(t *testing.T) {
 	_tg_init()
 	group.Poll()

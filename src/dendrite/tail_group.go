@@ -25,7 +25,10 @@ type TailGroup struct {
 }
 
 func (groups *TailGroups) Loop() {
-	for {
+	for i := 0; true; i++ {
+		if i%60 == 0 {
+			groups.Refresh()
+		}
 		groups.Poll()
 		time.Sleep(1 * time.Second)
 	}
@@ -34,6 +37,12 @@ func (groups *TailGroups) Loop() {
 func (groups *TailGroups) Poll() {
 	for _, g := range *groups {
 		g.Poll()
+	}
+}
+
+func (groups *TailGroups) Refresh() {
+	for _, g := range *groups {
+		g.Refresh()
 	}
 }
 
