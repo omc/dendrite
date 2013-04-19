@@ -7,33 +7,35 @@
 
 ## Overview
 
-Dendrite scrapes your existing logs, and re-emits the unified log stream in modern, sensible, structured formats, like JSON and StatsD, over common protocols such as TCP, UDP, files.  SSL/TLS, RFC5424 Syslog, HTTP, etc should be coming soon (Want to contribute?).
+Dendrite scrapes your existing logs and re-emits a unified log stream in modern, sensible, structured formats like JSON and StatsD over common protocols such as TCP, UDP, and file streams.  SSL/TLS, RFC5424 Syslog, HTTP, etc., should be coming soon (Want to contribute?).
 
 ## Why Dendrite?
 
-### Unified, structured logs and metrics are awesome
+### Unified, structured logs and metrics are awesome.
 
-If you have a unified log stream, it's easy to build and use tools that consume, forward, and analyze your logs.
+Once you have a unified log stream, it's easy to build and use tools that consume, forward, and analyze your logs in scalable and understandable ways.
 
 ### Logging is easier than instrumentation.
 
-All applications generate logs. Not all applications are instrumented for metrics. On top of which, there are many disparate instrumentation libraries, such as JMX, StatsD, Metrics, Ostrich, and others.  We might start polling them laster, if people find this convenient.
+All applications generate logs. Not all applications are instrumented for metrics.
+
+There are too many disparate instrumentation libraries such as JMX, StatsD, Metrics, Ostrich, and others.  (We might start polling them later, if people find this convenient.)
 
 Files are easy to read. Extracting metrics and statistics out of log files can be much easier than instrumenting an entire application to emit metrics.
 
 ### Configure dendrite, not every application.
 
-In today's open-source environment, it's common for, e.g., a Ruby on Rails app to be served by HAProxy, Nginx, a Varnish server, a Rack server, and Rails itself. And then you'll want slow query logs from your database and your Redis server. The list goes on.
+In today's open-source environment, it's common for, e.g., a Ruby on Rails app, to be served by HAProxy, Nginx, a Varnish server, a Rack server, and Rails itself. And then you'll want slow query logs from your database and your Redis server... and what about your work queue system...?  The list goes on!
 
-It's easy to create and share useful configuration cookbooks for each of these services, drop them into your `/etc/dendrite/conf.d`, reload Dendrite, and be off and running with real-time metrics.
+With Dendrite, it's easy to create and share useful configuration cookbooks for each of these services, drop them into your `/etc/dendrite/conf.d` directory, reload Dendrite, and be off and running with real-time metrics.
 
 ### Dendrite is structured.
 
-Logs are more than lines of text. Dendrite understands dates, numbers, counters, timings, searchable strings, fields, etc.
+Logs are more than lines of text. Dendrite understands dates, numbers, counters, timings, searchable strings, fields, and more.
 
 ### Dendrite is tiny.
 
-Running the agent on your servers typically consumes less than 5MB of RAM, and very little CPU.
+Running the optimized agent on your servers typically consumes less than 5MB of RAM, and very little CPU.
 
 ## Configuration
 
