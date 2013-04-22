@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Dendrite by onemorecloud</title>
+    <title>Dendrite</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
@@ -19,26 +19,15 @@
         <p></p>
 
         <p class="view"><a href="https://github.com/onemorecloud/dendrite">View the Project on GitHub <small>onemorecloud/dendrite</small></a></p>
-
-
         <ul>
-          <li><a href="https://github.com/onemorecloud/dendrite/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/onemorecloud/dendrite/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/onemorecloud/dendrite">View On <strong>GitHub</strong></a></li>
+          <li><a href="https://github.com/onemorecloud/dendrite/#readme">View On <strong>GitHub</strong></a></li>
+          <li><a href="https://github.com/onemorecloud/dendrite/blob/master/tutorial.md">Read the  <strong>Tutorial</strong></a></li>          <li><a href="https://github.com/onemorecloud/dendrite/blob/master/downloads.md">Download <strong>Packages</strong></a></li>
         </ul>
       </header>
       <section>
-        <h1>Dendrite</h1>
 
-<blockquote>
-<p>Are you looking for <a href="https://github.com/onemorecloud/dendrite/blob/master/downloads.md">downloads</a>,
-<a href="https://github.com/onemorecloud/dendrite/blob/master/tutorial.md">a tutorial</a>,
-or the <a href="https://github.com/onemorecloud/dendrite/blob/master/manifesto.md">manifesto</a>? &lt;/clippy&gt;</p>
-</blockquote>
-
-<h2>Overview</h2>
-
-<p>Dendrite scrapes your existing logs and re-emits a unified log stream in modern, sensible, structured formats like JSON and StatsD over common protocols such as TCP, UDP, and file streams.  SSL/TLS, RFC5424 Syslog, HTTP, etc., should be coming soon (Want to contribute?).</p>
+<p><big><blockquote>Dendrite scrapes your existing logs and re-emits a unified log stream in modern, sensible, structured formats like JSON and StatsD over common protocols such as TCP, UDP, file streams, with <a href="https://github.com/onemorecloud/dendrite/issues?labels=integration&page=1&state=open">more coming soon</a>. </blockquote>
+</big></p>
 
 <h2>Why Dendrite?</h2>
 
@@ -58,7 +47,7 @@ or the <a href="https://github.com/onemorecloud/dendrite/blob/master/manifesto.m
 
 <p>In today's open-source environment, it's common for, e.g., a Ruby on Rails app, to be served by HAProxy, Nginx, a Varnish server, a Rack server, and Rails itself. And then you'll want slow query logs from your database and your Redis server... and what about your work queue system...?  The list goes on!</p>
 
-<p>With Dendrite, it's easy to create and share useful configuration cookbooks for each of these services, drop them into your <code>/etc/dendrite/conf.d</code> directory, reload Dendrite, and be off and running with real-time metrics.</p>
+<p>With Dendrite, it's easy to create and share useful <a href="https://github.com/onemorecloud/dendrite/tree/master/cookbook">configuration cookbooks</a> for each of these services, drop them into your <code>/etc/dendrite/conf.d</code> directory, reload Dendrite, and be off and running with real-time metrics.</p>
 
 <h3>Dendrite is structured.</h3>
 
@@ -66,116 +55,17 @@ or the <a href="https://github.com/onemorecloud/dendrite/blob/master/manifesto.m
 
 <h3>Dendrite is tiny.</h3>
 
-<p>Running the optimized agent on your servers typically consumes less than 5MB of RAM, and very little CPU.</p>
+<p>Running the optimized agent on your servers typically consumes less than 5MB of RAM, and very little CPU.  Some similar projects are written in Java, and require orders of magnitude more memory.</p>
 
-<h2>Configuration</h2>
+<h3>Dendrite easy to deploy.</h3>
 
-<p>Dendrite will load a config file at <code>/etc/dendrite/conf.yaml</code>. This is overridable with the <code>-f</code> flag. Dendrite will then load any YAML files it can find in a <code>conf.d</code> directory below the main <code>conf.yml</code> config file. The configurations in these files will be merged into the main config file. By convention, <code>conf.d</code> config files should only contain one source or destination group each.</p>
+<p><a href="https://github.com/onemorecloud/dendrite/blob/master/downloads.md">The binaries</a> are statically compiled golang with no dependencies.  Just download and run with monit, upstart, start-stop-daemon, etc.</p>
 
-<p>The primary YAML file follows a format looks like this:</p>
 
-<div class="highlight"><pre><span class="l-Scalar-Plain">global</span><span class="p-Indicator">:</span>
-  <span class="c1"># Where we store pointers into the current position of files</span>
-  <span class="l-Scalar-Plain">offset_dir</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/var/lib/dendrite</span>
-
-  <span class="c1"># Number of exiting bytes to consume when we observe a new file.  Equivalent </span>
-  <span class="c1"># to tail -n, but with bytes instead of lines.  -1 for unlimited.</span>
-  <span class="l-Scalar-Plain">max_backfill_bytes</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">0</span>
-  <span class="c1"># more keys may be added in later dendrite versions</span>
-<span class="l-Scalar-Plain">sources</span><span class="p-Indicator">:</span>
-  <span class="c1"># ... (usually empty, delegated to the conf.d)</span>
-<span class="l-Scalar-Plain">destinations</span><span class="p-Indicator">:</span>
-  <span class="c1"># ... (usually empty, delegated to the conf.d)</span>
-</pre></div>
-
-<p>A typical conf.d yaml file looks like:</p>
-
-<div class="highlight"><pre><span class="l-Scalar-Plain">sources</span><span class="p-Indicator">:</span>
-  <span class="c1"># a key/name for the service</span>
-  <span class="l-Scalar-Plain">syslog</span><span class="p-Indicator">:</span>
-
-    <span class="c1"># Astericks, etc are useful. Syntax is documented at</span>
-    <span class="c1"># http://golang.org/pkg/path/filepath/#Match</span>
-    <span class="l-Scalar-Plain">glob</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/var/log/system.log</span>
-
-    <span class="c1"># The log lines are parsed with a RE2 regex</span>
-    <span class="c1"># (https://code.google.com/p/re2/wiki/Syntax). Named matching groups</span>
-    <span class="c1"># become columns in the structured output.</span>
-    <span class="c1">#</span>
-    <span class="c1"># This pattern parses my OS X syslog. Syslog isn't consistent, </span>
-    <span class="c1"># so this may not work on your system.</span>
-    <span class="l-Scalar-Plain">pattern</span><span class="p-Indicator">:</span> <span class="s">"(?P&lt;date&gt;.*?:[0-9]+)</span><span class="nv"> </span><span class="s">(?P&lt;user&gt;\\S+)</span><span class="nv"> </span><span class="s">(?P&lt;prog&gt;\\w+)\\[(?P&lt;pid&gt;\\d+)\\]:</span><span class="nv"> </span><span class="s">(?P&lt;text&gt;.*)"</span>
-
-    <span class="c1"># The output of the regexp can be post-processed. This allows you</span>
-    <span class="c1"># to specify type information, etc.</span>
-    <span class="c1">#</span>
-    <span class="c1"># Current field types are string, date, tokenized, int, timestamp,</span>
-    <span class="c1"># as well as gauge, timing, and metric. The last few types are </span>
-    <span class="c1"># specialized integers, and will be treated differently by statsd.</span>
-    <span class="l-Scalar-Plain">fields</span><span class="p-Indicator">:</span>
-      <span class="c1"># tstamp is the field name in the output.</span>
-      <span class="l-Scalar-Plain">tstamp</span><span class="p-Indicator">:</span>
-        <span class="c1"># date is the name of the regex match group.</span>
-        <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">date</span>
-        <span class="l-Scalar-Plain">type</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">timestamp</span>
-        <span class="l-Scalar-Plain">format</span><span class="p-Indicator">:</span> <span class="s">"Jan</span><span class="nv"> </span><span class="s">_2</span><span class="nv"> </span><span class="s">15:04:05"</span>
-      <span class="l-Scalar-Plain">line</span><span class="p-Indicator">:</span> 
-        <span class="c1"># you can match numbered subgroups, in addition to named ones.</span>
-        <span class="l-Scalar-Plain">group</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">0</span>
-      <span class="l-Scalar-Plain">tokens</span><span class="p-Indicator">:</span> 
-        <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">text</span>
-        <span class="c1"># this will create an array of the matched tokens.</span>
-        <span class="l-Scalar-Plain">type</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">tokenized</span>
-        <span class="l-Scalar-Plain">pattern</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">\S+\b</span>
-      <span class="l-Scalar-Plain">text</span><span class="p-Indicator">:</span> 
-        <span class="c1"># If there wasn't the tokens field above, this would be </span>
-        <span class="c1"># unneccessary. All named match groups are implicitly turned into </span>
-        <span class="c1"># string fields. However, since I used the "text" match group  </span>
-        <span class="c1"># above, the implicit string match no longer exists.</span>
-        <span class="l-Scalar-Plain">type</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">string</span>
-      <span class="l-Scalar-Plain">pid</span><span class="p-Indicator">:</span>
-        <span class="l-Scalar-Plain">type</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">int</span>
-</pre></div>
-
-<p>Or for a destination <code>conf.d</code> YAML file:</p>
-
-<div class="highlight"><pre><span class="l-Scalar-Plain">destinations</span><span class="p-Indicator">:</span>
-  <span class="c1"># a key/url for the destination.  Typically, the scheme portion of the url</span>
-  <span class="c1"># will be of the form transport+encoding.  We currently support statsd and </span>
-  <span class="c1"># json encodings, as well as udp, tcp, and file transports.</span>
-  <span class="c1">#</span>
-  <span class="c1"># Also, the colon in urls always needs to be quoted, so as not to be </span>
-  <span class="c1"># confused with nested yaml.</span>
-  <span class="l-Scalar-Plain">stats</span><span class="p-Indicator">:</span> <span class="s">"udp+statsd://foo.bar.com:1234"</span>
-</pre></div>
-
-<div class="highlight"><pre><span class="l-Scalar-Plain">destinations</span><span class="p-Indicator">:</span>
-  <span class="c1"># another example</span>
-  <span class="l-Scalar-Plain">tmp</span><span class="p-Indicator">:</span> <span class="s">"file+json:///tmp/json.log"</span>
-</pre></div>
-
-<p>Look in the cookbook directory for more examples.</p>
-
-<h2>Getting Started</h2>
-
-<ol>
-<li>Download the latest binary for your system from our <a href="https://github.com/onemorecloud/dendrite/blob/master/downloads.md">downloads page</a>.</li>
-<li>Walk through the  <a href="https://github.com/onemorecloud/dendrite/blob/master/tutorial.md">tutorial</a>.</li>
-</ol><h2>Contributing</h2>
-
-<p>Join us in our <a href="https://groups.google.com/group/dendrite-talk">Google Group</a> or <a href="https://www.hipchat.com/gKr8c8S4o">HipChat</a> room to give feedback and chat about how you might be interested in using and/or contributing.</p>
-
-<p>Ideas:</p>
-
-<ul>
-<li>Implement a cookbook entry for your favorite log format.</li>
-<li><a href="https://github.com/onemorecloud/dendrite/issues?state=open">Open issues</a></li>
-<li>tackle an output protocol/encoding you'd like to see included.</li>
-</ul>
       </section>
       <footer>
-        <p>This project is maintained by <a href="https://github.com/onemorecloud">onemorecloud</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p>Join us in our <a href="https://groups.google.com/group/dendrite-talk">Google Group</a> or <a href="https://www.hipchat.com/gKr8c8S4o">HipChat</a> room to give feedback and chat about how you might be interested in using and/or contributing.</p>
+
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
