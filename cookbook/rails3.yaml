@@ -1,0 +1,72 @@
+# -- log line --
+# Started GET "/" for 69.114.189.55 at Sun Apr 21 16:48:47 +0000 2013
+#   Processing by PagesController#root as HTML
+#   Parameters: {"name"=>"Home"}
+# login_from_cookie
+# login_from_cookie: auth_token not present 
+# login_from_cookie: user (nil) remember_token? ()
+# PagesController#root
+# login_from_cookie
+# login_from_cookie: auth_token not present 
+# login_from_cookie: user (nil) remember_token? ()
+# Rendered pages/home.html.haml within layouts/application.html (40.0ms)
+# login_from_cookie
+# login_from_cookie: auth_token not present 
+# login_from_cookie: user (nil) remember_token? ()
+# Rendered layouts/_head.html.haml (12.0ms)
+# login_from_cookie
+# login_from_cookie: auth_token not present 
+# login_from_cookie: user (nil) remember_token? ()
+# login_from_cookie
+# login_from_cookie: auth_token not present 
+# login_from_cookie: user (nil) remember_token? ()
+# login_from_cookie
+# login_from_cookie: auth_token not present 
+# login_from_cookie: user (nil) remember_token? ()
+# Rendered layouts/_page_nav.html.haml (244.0ms)
+# Rendered layouts/_page_header.html.haml (0.0ms)
+# Rendered layouts/_page_main.html.haml (8.0ms)
+# Rendered layouts/_page_footer.html.haml (20.0ms)
+# Rendered layouts/_typekit_js.html.haml (4.0ms)
+# Rendered layouts/_analytics.html.haml (8.0ms)
+# Completed 200 OK in 420ms (Views: 416.0ms | ActiveRecord: 0.0ms | Solr: 0.0ms)
+# 
+# -- output --
+# {
+#   "date":1366562927,
+#   "latency":420,
+#   "method":"GET",
+#   "remote_address":"69.114.189.55",
+#   "status":200,
+#   "uri":"/"
+# }
+sources:
+  # a key/name for the service
+  syslog:
+  
+    # Astericks, etc are useful. Syntax is documented at
+    # http://golang.org/pkg/path/filepath/#Match
+    glob: *.log
+
+    # The log lines are parsed with a RE2 regex
+    # (https://code.google.com/p/re2/wiki/Syntax). Named matching groups
+    # become columns in the structured output.
+    #
+    # This pattern parses my OS X syslog. Syslog isn't consistent, 
+    # so this may not work on your system.
+    pattern: "(?s)Started (?P<method>[A-Z]+) \"(?P<uri>[^\"]+)\" for (?P<remote_address>[0-9\\.]+) at (?P<date>.*?)\n.*?\nCompleted (?P<status>[0-9]+) .* in (?P<latency>[0-9]+)ms"
+    
+    # The output of the regexp can be post-processed. This allows you
+    # to specify type information, etc.
+    #
+    # Current field types are string, date, tokenized, int, timestamp,
+    # as well as gauge, timing, and metric. The last few types are 
+    # specialized integers, and will be treated differently by statsd.
+    fields:
+      status:
+        type: int
+      latency: 
+        type: int
+      date: 
+        type: timestamp
+        format: "Mon Jan 2 15:04:05 -0700 2006"
