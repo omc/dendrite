@@ -134,7 +134,7 @@ Look in the cookbook directory for more examples.
 
 ## Getting Started
 
-1. Download the latest binary for your system from our [downloads page](https://github.com/onemorecloud/dendrite/blob/master/downloads.md).
+1. Download the latest binary for your system from our [downloads page](https://github.com/onemorecloud/dendrite/blob/master/downloads.md).  Alternately, if you have a Go environment and want to run from trunk, you can simply run `go get github.com/onemorecloud/dendrite/cmd/dendrite`.
 2. Walk through the  [tutorial](https://github.com/onemorecloud/dendrite/blob/master/tutorial.md).
 
 ## Contributing

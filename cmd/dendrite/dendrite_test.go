@@ -2,13 +2,13 @@ package main
 
 import (
 	"encoding/json"
-  "fmt"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-  "regexp"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -122,54 +122,54 @@ func TestTcp(t *testing.T) {
 }
 
 func TestCookbooks(t *testing.T) {
- sentinel := "# -- log line --\n"
- rglob := regexp.MustCompile("(\n[ ]+glob:).*")
- rlog := regexp.MustCompile("(?s)# (.*?)#\\s*# -- output --")
- rout := regexp.MustCompile("(?s)# -- output --.*?# (.+?# })")
- matches, _ := filepath.Glob("../../cookbook/*.yaml")
- for _, m := range matches {
-   fmt.Println(m)
-   bytes, err := ioutil.ReadFile(m)
-   if err != nil {
-     t.Fatal("can't open", m)
-   }
+	sentinel := "# -- log line --\n"
+	rglob := regexp.MustCompile("(\n[ ]+glob:).*")
+	rlog := regexp.MustCompile("(?s)# (.*?)#\\s*# -- output --")
+	rout := regexp.MustCompile("(?s)# -- output --.*?# (.+?# })")
+	matches, _ := filepath.Glob("../../cookbook/*.yaml")
+	for _, m := range matches {
+		fmt.Println(m)
+		bytes, err := ioutil.ReadFile(m)
+		if err != nil {
+			t.Fatal("can't open", m)
+		}
 
-   strs := strings.Split(string(bytes), sentinel)
-   for i, str := range strs {
-     if i == 0 {
-       continue
-     }
+		strs := strings.Split(string(bytes), sentinel)
+		for i, str := range strs {
+			if i == 0 {
+				continue
+			}
 
-     os.RemoveAll("tmp")
-     os.Mkdir("tmp", 0777)
-     os.Mkdir("tmp/conf.d", 0777)
-     exec.Command("cp", "../../testdata/conf.yaml", "tmp").Run()
+			os.RemoveAll("tmp")
+			os.Mkdir("tmp", 0777)
+			os.Mkdir("tmp/conf.d", 0777)
+			exec.Command("cp", "../../testdata/conf.yaml", "tmp").Run()
 
-     log := rlog.FindStringSubmatch(str)[1]
-     out := rout.FindStringSubmatch(str)[1]
-     out = strings.Replace(out, "\n#", " ", -1)
+			log := rlog.FindStringSubmatch(str)[1]
+			out := rout.FindStringSubmatch(str)[1]
+			out = strings.Replace(out, "\n#", " ", -1)
 
-     log = strings.Replace(log, "\n# ", "\n", -1)
+			log = strings.Replace(log, "\n# ", "\n", -1)
 
-     ioutil.WriteFile("tmp/foo.log", []byte(log+"\n"), 0777)
+			ioutil.WriteFile("tmp/foo.log", []byte(log+"\n"), 0777)
 
-     bytes = rglob.ReplaceAll(bytes, []byte("$1 tmp/foo.log"))
-     ioutil.WriteFile("tmp/conf.d/sub.yaml", bytes, 0777)
-     run("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml", "-l", "tmp/test.log")
+			bytes = rglob.ReplaceAll(bytes, []byte("$1 tmp/foo.log"))
+			ioutil.WriteFile("tmp/conf.d/sub.yaml", bytes, 0777)
+			run("./dendrite", "-q", "0", "-d", "-f", "tmp/conf.yaml", "-l", "tmp/test.log")
 
-     var expected map[string]interface{}
-     var actual map[string]interface{}
-     json.Unmarshal([]byte(out), &expected)
-     actualBytes, _ := ioutil.ReadFile("tmp/out.json")
-     json.Unmarshal(actualBytes, &actual)
-     if len(expected) == 0 {
-       t.Error("malformatted expect")
-     }
-     for k, _ := range expected {
-       if fmt.Sprintf("%s", actual[k]) != fmt.Sprintf("%s", expected[k]) {
-         t.Fatal("mismatch on", k, "[", actual[k], "]", "[", expected[k], "]")
-       }
-     }
-   }
- }
+			var expected map[string]interface{}
+			var actual map[string]interface{}
+			json.Unmarshal([]byte(out), &expected)
+			actualBytes, _ := ioutil.ReadFile("tmp/out.json")
+			json.Unmarshal(actualBytes, &actual)
+			if len(expected) == 0 {
+				t.Error("malformatted expect")
+			}
+			for k, _ := range expected {
+				if fmt.Sprintf("%s", actual[k]) != fmt.Sprintf("%s", expected[k]) {
+					t.Fatal("mismatch on", k, "[", actual[k], "]", "[", expected[k], "]")
+				}
+			}
+		}
+	}
 }

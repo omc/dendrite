@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/onemorecloud/dendrite"
 	"bufio"
 	"flag"
 	"github.com/fizx/logs"
+	"github.com/onemorecloud/dendrite"
 	"io"
 	"log"
 	"os"

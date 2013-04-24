@@ -20,6 +20,10 @@ drwxr-xr-x  5 kyle  wheel   170B Apr 16 15:41 cookbook
 -rwxr-xr-x  1 kyle  wheel   3.5M Apr 16 14:38 dendrite
 ```
 
+> Alternately, if you have a Go environment and want to run from trunk, you 
+> can simply run `go get github.com/onemorecloud/dendrite/cmd/dendrite`.
+
+
 ## Set up a fake configuration.
 
 Dendrite will normally look for /etc/dendrite/config.yaml, but we're going to tell it otherwise.  For now, lets create the following simple config at ./config.yaml:
