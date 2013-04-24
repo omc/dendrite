@@ -11,8 +11,11 @@ rm -rf $GOPATH
 mkdir -p $GOPATH/src $GOPATH/bin $GOPATH/pkg
 source ~/workspace/golang-crosscompile/crosscompile.bash
 
+cd cmd/dendrite
 go-all get
 go-build-all dendrite.go
+cd -
+
 git rev-parse HEAD > REVISION
 INCLUDES="cookbook LICENSE Readme.md tutorial.md VERSION REVISION"
 VERSION=`cat VERSION`
@@ -22,7 +25,7 @@ touch downloads.md
 echo "## $VERSION" > tmp.md
 echo >> tmp.md
 
-for BINARY in `find . -type f -name "dendrite-*" -maxdepth 1`
+for BINARY in `find cmd/dendrite -type f -name "dendrite-*" -maxdepth 1`
 do
   NAME=`echo $BINARY | sed 's/dendrite-//' | xargs basename`
   DIST="dist/$NAME/$VERSION"
