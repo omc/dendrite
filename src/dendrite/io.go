@@ -19,7 +19,7 @@ type rwStruct struct {
 
 type closeStruct struct {
 	w *bufio.Writer
-	c net.Conn
+	c io.Closer
 }
 
 var EmptyReader = new(noOpReader)

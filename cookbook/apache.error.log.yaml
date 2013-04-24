@@ -14,7 +14,8 @@ sources:
     pattern: "\\[(?P<time>[^\\]]+)\\] \\[(?P<severity>\\S+)\\] \\[client (?P<ip>\\S+)\\] (?P<message>.*)\\n"
     fields:
       message:
-        type: tokenized
+        type: string
+        treatment: tokenized
         pattern: \S+?\b
       time:
         type: timestamp

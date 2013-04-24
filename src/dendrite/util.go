@@ -107,24 +107,34 @@ func RecursiveMergeNoConflict(a map[string]interface{}, b map[string]interface{}
 	return nil
 }
 
-func parseField(str string) (FieldType, error) {
+func parseFieldType(str string) (FieldType, error) {
 	switch str {
 	case "int":
 		return Integer, nil
+	case "double":
+		return Double, nil
+	case "string", "":
+		return String, nil
+	case "timestamp", "date":
+		return Timestamp, nil
+	}
+	return -1, fmt.Errorf("Can't recognize field type: %s", str)
+}
+
+func parseFieldTreatment(str string) (FieldTreatment, error) {
+	switch str {
+	case "simple", "":
+		return Simple, nil
 	case "gauge":
 		return Gauge, nil
 	case "metric":
 		return Metric, nil
 	case "counter":
 		return Counter, nil
-	case "string":
-		return String, nil
 	case "tokenized":
 		return Tokens, nil
-	case "timestamp", "date":
-		return Timestamp, nil
 	}
-	return -1, fmt.Errorf("Can't recognize field type: %s", str)
+	return -1, fmt.Errorf("Can't recognize field treatment: %s", str)
 }
 
 func getMap(mapping map[string]interface{}, key string) (map[string]interface{}, error) {

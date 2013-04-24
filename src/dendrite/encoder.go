@@ -30,7 +30,7 @@ func NewEncoder(u *url.URL) (Encoder, error) {
 func (*RawStringEncoder) Encode(out map[string]Column, writer io.Writer) {
 	for _, v := range out {
 		if v.Type == String {
-			writer.Write([]byte(v.Value.(string)))
+			writer.Write([]byte(v.Value.(string) + "\n"))
 		}
 	}
 }
