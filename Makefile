@@ -1,7 +1,7 @@
 default: build test 
 
 build:
-	go build
+	cd cmd/dendrite && go build && cp dendrite ../../
 	
 release: crosscompile
 	s3cmd sync dist/. s3://dendrite-binaries

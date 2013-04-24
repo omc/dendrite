@@ -2,6 +2,7 @@
 /dist
 tmp
 dendrite-*
+cmd/dendrite/dendrite
 /tmp*
 REVISION
 tmp.out
