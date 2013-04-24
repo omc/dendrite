@@ -1,9 +1,9 @@
 package dendrite
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/fizx/logs"
-	"encoding/json"
 	"github.com/kylelemons/go-gypsy/yaml"
 	"net/url"
 	"path"
