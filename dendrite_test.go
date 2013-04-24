@@ -124,10 +124,11 @@ func TestTcp(t *testing.T) {
 func TestCookbooks(t *testing.T) {
 	sentinel := "# -- log line --\n"
 	rglob := regexp.MustCompile("(\n[ ]+glob:).*")
-	rlog := regexp.MustCompile("# (.*)")
+	rlog := regexp.MustCompile("(?s)# (.*?)#\\s*# -- output --")
 	rout := regexp.MustCompile("(?s)# -- output --.*?# (.+?# })")
 	matches, _ := filepath.Glob("cookbook/*.yaml")
 	for _, m := range matches {
+	  fmt.Println(m)
 		bytes, err := ioutil.ReadFile(m)
 		if err != nil {
 			t.Fatal("can't open", m)
@@ -147,6 +148,8 @@ func TestCookbooks(t *testing.T) {
 			log := rlog.FindStringSubmatch(str)[1]
 			out := rout.FindStringSubmatch(str)[1]
 			out = strings.Replace(out, "\n#", " ", -1)
+
+			log = strings.Replace(log, "\n# ", "\n", -1)
 
 			ioutil.WriteFile("tmp/foo.log", []byte(log+"\n"), 0777)
 

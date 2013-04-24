@@ -30,7 +30,16 @@ func Unescape(in string) string {
 		c := bytes[i]
 		if c == '\\' {
 			i++
-			c = bytes[i]
+			switch bytes[i] {
+			case 't':
+				c = '\t'
+			case 'n':
+				c = '\n'
+			case 'r':
+				c = '\r'
+			default:
+				c = bytes[i]
+			}
 		}
 		out = append(out, c)
 	}
