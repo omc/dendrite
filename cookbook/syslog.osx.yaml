@@ -45,13 +45,14 @@ sources:
         group: 0
       tokens: 
         name: text
+        type: string
         # this will create an array of the matched tokens.
-        type: tokenized
+        treatment: tokenized
         pattern: \S+\b
       text: 
         # If there wasn't the tokens field above, this would be 
         # unneccessary. All named match groups are implicitly turned into 
-        # string fields. However, since I used the "text" match group  
+        # simple string fields. However, since I used the "text" match group  
         # above, the implicit string match no longer exists.
         type: string
       pid:

@@ -12,14 +12,13 @@ type FixedTimeProvider struct{}
 
 func (*FixedTimeProvider) Now() time.Time {
 	return time.Unix(1234567890, 0)
-
 }
 
 var parser Parser
 var offsetFile string
 var tail *Tail
 var output chan Record
-var line = "{\"_file\":{\"Type\":0,\"Value\":\"solr.txt\"},\"_group\":{\"Type\":0,\"Value\":\"foo\"},\"_hostname\":{\"Type\":0,\"Value\":\"host.local\"},\"_offset\":{\"Type\":2,\"Value\":0},\"_time\":{\"Type\":6,\"Value\":1234567890},\"line\":{\"Type\":0,\"Value\":\"INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1\"}}"
+var line = "{\"_file\":{\"Type\":0,\"Treatment\":0,\"Value\":\"solr.txt\"},\"_group\":{\"Type\":0,\"Treatment\":0,\"Value\":\"foo\"},\"_hostname\":{\"Type\":0,\"Treatment\":0,\"Value\":\"host.local\"},\"_offset\":{\"Type\":1,\"Treatment\":0,\"Value\":0},\"_time\":{\"Type\":3,\"Treatment\":0,\"Value\":1234567890},\"line\":{\"Type\":0,\"Treatment\":0,\"Value\":\"INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1\"}}"
 
 func _tail_init() {
 	StandardTimeProvider = new(FixedTimeProvider)

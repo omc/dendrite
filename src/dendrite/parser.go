@@ -9,8 +9,9 @@ import (
 )
 
 type Column struct {
-	Type  FieldType
-	Value interface{}
+	Type      FieldType
+	Treatment FieldTreatment
+	Value     interface{}
 }
 
 type Record map[string]Column
@@ -90,11 +91,11 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 		}
 
 		out := make(map[string]Column)
-		out["_offset"] = Column{Integer, atomic.LoadInt64(counter)}
-		out["_file"] = Column{String, parser.file}
-		out["_time"] = Column{Timestamp, StandardTimeProvider.Now().Unix()}
-		out["_group"] = Column{String, parser.group}
-		out["_hostname"] = Column{String, parser.hostname}
+		out["_offset"] = Column{Integer, Simple, atomic.LoadInt64(counter)}
+		out["_file"] = Column{String, Simple, parser.file}
+		out["_time"] = Column{Timestamp, Simple, StandardTimeProvider.Now().Unix()}
+		out["_group"] = Column{String, Simple, parser.group}
+		out["_hostname"] = Column{String, Simple, parser.hostname}
 		for _, spec := range parser.fields {
 			g := spec.Group
 			if g < 0 || g > len(m)/2 {
@@ -119,17 +120,25 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 						}
 						t = adjusted
 					}
-					out[spec.Alias] = Column{Timestamp, t.Unix()}
+					out[spec.Alias] = Column{Timestamp, spec.Treatment, t.Unix()}
 				}
 			case String:
-				out[spec.Alias] = Column{String, s}
-			case Gauge, Metric, Integer, Counter:
+				if spec.Treatment == Tokens {
+					out[spec.Alias] = Column{Tokens, spec.Treatment, spec.Pattern.FindAllString(s, -1)}
+				} else {
+					out[spec.Alias] = Column{String, spec.Treatment, s}
+				}
+			case Integer:
 				n, err := strconv.ParseInt(s, 10, 64)
 				if err == nil {
-					out[spec.Alias] = Column{spec.Type, n}
+					out[spec.Alias] = Column{spec.Type, spec.Treatment, n}
 				}
-			case Tokens:
-				out[spec.Alias] = Column{Tokens, spec.Pattern.FindAllString(s, -1)}
+			case Double:
+				n, err := strconv.ParseFloat(s, 64)
+				if err == nil {
+					out[spec.Alias] = Column{spec.Type, spec.Treatment, n}
+				}
+
 			default:
 				panic(nil)
 			}

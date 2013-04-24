@@ -29,12 +29,12 @@
 # Rendered layouts/_page_footer.html.haml (20.0ms)
 # Rendered layouts/_typekit_js.html.haml (4.0ms)
 # Rendered layouts/_analytics.html.haml (8.0ms)
-# Completed 200 OK in 420ms (Views: 416.0ms | ActiveRecord: 0.0ms | Solr: 0.0ms)
+# Completed 200 OK in 420.0ms (Views: 416.0ms | ActiveRecord: 0.0ms | Solr: 0.0ms)
 # 
 # -- output --
 # {
 #   "date":1366562927,
-#   "latency":420,
+#   "latency":420.0,
 #   "method":"GET",
 #   "remote_address":"69.114.189.55",
 #   "status":200,
@@ -54,7 +54,7 @@ sources:
     #
     # This pattern parses my OS X syslog. Syslog isn't consistent, 
     # so this may not work on your system.
-    pattern: "(?s)Started (?P<method>[A-Z]+) \"(?P<uri>[^\"]+)\" for (?P<remote_address>[0-9\\.]+) at (?P<date>.*?)\n.*?\nCompleted (?P<status>[0-9]+) .* in (?P<latency>[0-9]+)ms"
+    pattern: "(?s)Started (?P<method>[A-Z]+) \"(?P<uri>[^\"]+)\" for (?P<remote_address>[0-9\\.]+) at (?P<date>.*?)\n.*?\nCompleted (?P<status>[0-9]+) .* in (?P<latency>[0-9\\.]+)ms"
     
     # The output of the regexp can be post-processed. This allows you
     # to specify type information, etc.
@@ -66,7 +66,7 @@ sources:
       status:
         type: int
       latency: 
-        type: int
+        type: double
       date: 
         type: timestamp
         format: "Mon Jan 2 15:04:05 -0700 2006"

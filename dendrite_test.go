@@ -128,7 +128,7 @@ func TestCookbooks(t *testing.T) {
 	rout := regexp.MustCompile("(?s)# -- output --.*?# (.+?# })")
 	matches, _ := filepath.Glob("cookbook/*.yaml")
 	for _, m := range matches {
-	  fmt.Println(m)
+		fmt.Println(m)
 		bytes, err := ioutil.ReadFile(m)
 		if err != nil {
 			t.Fatal("can't open", m)
