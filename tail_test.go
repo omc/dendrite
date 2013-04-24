@@ -26,7 +26,7 @@ func _tail_init() {
 	offsetFile = os.TempDir() + "test.txt"
 	_ = os.Remove(offsetFile)
 	parser = NewRegexpParser("host.local", "foo", "solr.txt", output, "(?P<line>.+)\n", nil, 32768)
-	tail = NewTail(parser, -1, "data/solr.txt", offsetFile)
+	tail = NewTail(parser, -1, "testdata/solr.txt", offsetFile)
 }
 
 func TestStartsAtZero(t *testing.T) {
@@ -39,7 +39,7 @@ func TestStartsAtZero(t *testing.T) {
 func TestStartsAtOffset(t *testing.T) {
 	_tail_init()
 	ioutil.WriteFile(offsetFile, []byte("747\n"), 0777)
-	tail = NewTail(parser, -1, "data/solr.txt", offsetFile)
+	tail = NewTail(parser, -1, "testdata/solr.txt", offsetFile)
 	if tail.Offset() != 747 {
 		t.Errorf("initial offset was %d, not 747", tail.Offset())
 	}

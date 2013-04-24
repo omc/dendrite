@@ -11,11 +11,11 @@ crosscompile:
 
 test:	*.go
 	go test -v
-	cd src/dendrite && go test -v
+	cd cmd/dendrite && go test -v
 
 fmt:
 	go fmt .
-	cd src/dendrite && go fmt
+	cd cmd/dendrite && go fmt
 
 clean:
 	rm -f dendrite

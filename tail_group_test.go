@@ -12,7 +12,7 @@ var group *TailGroup = nil
 
 var _tg_init = func() {
 	config = new(SourceConfig)
-	config.Glob = "./data/solr*txt"
+	config.Glob = "./testdata/solr*txt"
 	config.Pattern = "(?P<line>.+)\n"
 	config.OffsetDir = "tmp"
 	_ = os.RemoveAll(config.OffsetDir)
@@ -36,19 +36,19 @@ func TestGroupHasTails(t *testing.T) {
 
 func TestRefreshPicksUpFiles(t *testing.T) {
 	_tg_init()
-	bash("rm -f data/solrN.txt")
+	bash("rm -f testdata/solrN.txt")
 	n := len(group.Tails)
 	if n != 2 {
 		t.Errorf("group has %d tails", n)
 	}
-	bash("touch data/solrN.txt")
+	bash("touch testdata/solrN.txt")
 	group.Refresh()
 	n = len(group.Tails)
 	if n != 3 {
 		t.Errorf("group has %d tails", n)
 	}
 
-	bash("rm -f data/solrN.txt")
+	bash("rm -f testdata/solrN.txt")
 }
 
 func TestGroupCanPoll(t *testing.T) {

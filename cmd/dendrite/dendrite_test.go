@@ -31,7 +31,7 @@ func run(str ...string) {
 func _init(t *testing.T) {
 	os.RemoveAll("tmp")
 	os.Mkdir("tmp", 0777)
-	matches, _ := filepath.Glob("src/dendrite/data/*")
+	matches, _ := filepath.Glob("../../testdata/*")
 	for _, m := range matches {
 		os.Chtimes(m, time.Now(), time.Now())
 	}
@@ -39,13 +39,13 @@ func _init(t *testing.T) {
 
 func TestTruncation(t *testing.T) {
 	_init(t)
-	bash("cp src/dendrite/data/solr.txt tmp/solr.txt")
+	bash("cp ../../testdata/solr.txt tmp/solr.txt")
 	go func() {
 		time.Sleep(time.Second / 2)
 		bash("cat /dev/null > tmp/solr.txt")
-		bash("cat src/dendrite/data/solr.txt >> tmp/solr.txt")
+		bash("cat ../../testdata/solr.txt >> tmp/solr.txt")
 	}()
-	run("./dendrite", "-q", "1", "-d", "-f", "src/dendrite/data/truncate.yaml")
+	run("./dendrite", "-q", "1", "-d", "-f", "../../testdata/truncate.yaml")
 	bytes, err := ioutil.ReadFile("tmp/out.json")
 	if err != nil {
 		t.Error(err)
@@ -59,8 +59,8 @@ func TestTruncation(t *testing.T) {
 
 func TestBackfill(t *testing.T) {
 	_init(t)
-	bash("cp src/dendrite/data/solr.txt tmp/solr.txt")
-	run("./dendrite", "-q", "0", "-d", "-f", "src/dendrite/data/backfill.yaml")
+	bash("cp ../../testdata/solr.txt tmp/solr.txt")
+	run("./dendrite", "-q", "0", "-d", "-f", "../../testdata/backfill.yaml")
 	bytes, err := ioutil.ReadFile("tmp/out.json")
 	if err != nil {
 		t.Error(err)
@@ -74,8 +74,8 @@ func TestBackfill(t *testing.T) {
 
 func TestGettingDataWithJunk(t *testing.T) {
 	_init(t)
-	bash("cp src/dendrite/data/junk.yaml tmp")
-	bash("cat src/dendrite/data/solr3.txt.gz | gunzip > tmp/solr.txt")
+	bash("cp ../../testdata/junk.yaml tmp")
+	bash("cat ../../testdata/solr3.txt.gz | gunzip > tmp/solr.txt")
 	run("./dendrite", "-q", "0", "-d", "-f", "tmp/junk.yaml")
 	bytes, err := ioutil.ReadFile("tmp/out.json")
 	if err != nil {
@@ -101,7 +101,7 @@ func TestGettingDataWithJunk(t *testing.T) {
 
 func TestTcp(t *testing.T) {
 	_init(t)
-	run("./dendrite", "-q", "0", "-d", "-f", "src/dendrite/data/conf.yaml")
+	run("./dendrite", "-q", "0", "-d", "-f", "../../testdata/conf.yaml")
 	bytes, err := ioutil.ReadFile("tmp/out.json")
 	if err != nil {
 		t.Error(err)
@@ -143,7 +143,7 @@ func TestCookbooks(t *testing.T) {
 			os.RemoveAll("tmp")
 			os.Mkdir("tmp", 0777)
 			os.Mkdir("tmp/conf.d", 0777)
-			exec.Command("cp", "src/dendrite/data/conf.yaml", "tmp").Run()
+			exec.Command("cp", "../../testdata/conf.yaml", "tmp").Run()
 
 			log := rlog.FindStringSubmatch(str)[1]
 			out := rout.FindStringSubmatch(str)[1]
