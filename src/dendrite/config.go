@@ -1,9 +1,9 @@
 package dendrite
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/fizx/logs"
-	"encoding/json"
 	"github.com/kylelemons/go-gypsy/yaml"
 	"net/url"
 	"path"
@@ -17,21 +17,29 @@ type FieldType int
 
 const (
 	String = iota
-	Tokens
 	Integer
-	Gauge
-	Metric
-	Counter
+	Double
 	Timestamp
 )
 
+type FieldTreatment int
+
+const (
+	Simple = iota
+	Tokens
+	Gauge
+	Metric
+	Counter
+)
+
 type FieldConfig struct {
-	Name    string
-	Alias   string
-	Type    FieldType
-	Group   int
-	Format  string
-	Pattern *regexp.Regexp
+	Name      string
+	Alias     string
+	Type      FieldType
+	Treatment FieldTreatment
+	Group     int
+	Format    string
+	Pattern   *regexp.Regexp
 }
 
 type SourceConfig struct {
@@ -201,13 +209,25 @@ func configFromMapping(mapping map[string]interface{}, hostname string) (*Config
 			if err != nil {
 				field.Type = String
 			} else {
-				field.Type, err = parseField(s)
+				field.Type, err = parseFieldType(s)
 				if err != nil {
 					logs.Warn("Invalid field type: %s, continuing... (error was %s)", s, err)
 					continue
 				}
 			}
 			logs.Info("found type %s", field.Type)
+
+			s, err = getString(fld, "treatment")
+			if err != nil {
+				field.Treatment = String
+			} else {
+				field.Treatment, err = parseFieldTreatment(s)
+				if err != nil {
+					logs.Warn("Invalid field treatment: %s, continuing... (error was %s)", s, err)
+					continue
+				}
+			}
+			logs.Info("found treatment %s", field.Treatment)
 
 			field.Format, err = getString(fld, "format")
 

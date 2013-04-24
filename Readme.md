@@ -80,8 +80,10 @@ sources:
     # The output of the regexp can be post-processed. This allows you
     # to specify type information, etc.
     #
-    # Current field types are string, date, tokenized, int, timestamp,
-    # as well as gauge, timing, and metric. The last few types are 
+    # Current field types are string, date, int, double and timestamp.
+    #
+    # There are "treatments," which include tokenized, as well as 
+    # gauge, timing, and metric. The last few treatments are for 
     # specialized integers, and will be treated differently by statsd.
     fields:
       # tstamp is the field name in the output.
@@ -95,8 +97,9 @@ sources:
         group: 0
       tokens: 
         name: text
+        type: string
         # this will create an array of the matched tokens.
-        type: tokenized
+        treatment: tokenized
         pattern: \S+\b
       text: 
         # If there wasn't the tokens field above, this would be 
