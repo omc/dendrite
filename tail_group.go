@@ -65,10 +65,27 @@ func NewTailGroup(config SourceConfig, output chan Record) *TailGroup {
 func (group *TailGroup) activate(match string) {
 	tail, ok := group.Tails[match]
 	if !ok {
+		fi, _ := os.Stat(match)
+		for _, tail = range group.Tails {
+			tfi, _ := tail.Stat()
+			if os.SameFile(fi, tfi) {
+				tail.Close()
+				delete(group.Tails, tail.Path)
+				off := tail.Offset()
+				tail.SetOffset(0)
+				tail.WriteOffset()
+				base := path.Base(match)
+				offset := path.Join(group.OffsetDir, base+".ptr")
+				tail = NewTail(group.NewParser(base), group.maxBackfill, match, offset, off)
+				group.Tails[match] = tail
+				return
+			}
+		}
 		base := path.Base(match)
 		offset := path.Join(group.OffsetDir, base+".ptr")
-		tail = NewTail(group.NewParser(base), group.maxBackfill, match, offset)
+		tail = NewTail(group.NewParser(base), group.maxBackfill, match, offset, 0)
 		group.Tails[match] = tail
+
 	}
 }
 

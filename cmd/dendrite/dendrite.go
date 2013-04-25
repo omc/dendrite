@@ -80,7 +80,12 @@ func main() {
 	if *quitAfter >= 0 {
 		start := time.Now()
 		logs.Debug("starting the poll")
+		i := 0
 		for {
+			i++
+			if i%10 == 0 {
+				groups.Refresh()
+			}
 			groups.Poll()
 			if time.Now().Sub(start) >= time.Duration((*quitAfter)*float64(time.Second)) {
 				break

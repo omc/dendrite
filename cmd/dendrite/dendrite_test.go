@@ -57,6 +57,29 @@ func TestTruncation(t *testing.T) {
 	}
 }
 
+func TestRotateUnder(t *testing.T) {
+	_init(t)
+	bash("cp ../../testdata/solr.txt tmp/solr.txt")
+	go func() {
+		time.Sleep(time.Second / 2)
+		bash("mv tmp/solr.txt tmp/solr2.txt")
+		bash("cat ../../testdata/solr.txt >> tmp/solr.txt")
+	}()
+	run("./dendrite", "-q", "1", "-d", "-f", "../../testdata/truncate.yaml")
+	bytes, err := ioutil.ReadFile("tmp/out.json")
+	if err != nil {
+		t.Error(err)
+	}
+	str := string(bytes)
+	arr := strings.Split(strings.TrimSpace(str), "\n")
+	if len(arr) != 2000 {
+		t.Error(len(arr), "not 2000")
+	}
+	if strings.Contains(str, "solr2.txt") {
+		t.Error("information picked up from solr2.txt, not solr.txt")
+	}
+}
+
 func TestBackfill(t *testing.T) {
 	_init(t)
 	bash("cp ../../testdata/solr.txt tmp/solr.txt")
