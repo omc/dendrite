@@ -3,9 +3,10 @@ package dendrite
 import (
 	"bufio"
 	"fmt"
-	tails "github.com/ActiveState/tail"
+	"github.com/ActiveState/tail/watch"
 	"github.com/fizx/logs"
 	"io"
+	"launchpad.net/tomb"
 	"os"
 	"path"
 	"strconv"
@@ -29,7 +30,7 @@ var StandardTimeProvider TimeProvider = new(SystemTimeProvider)
 type Tail struct {
 	Path       string
 	OffsetPath string
-	Watcher    tails.FileWatcher
+	Watcher    watch.FileWatcher
 	Parser     Parser
 
 	maxBackfill int64
@@ -43,7 +44,7 @@ func NewTail(parser Parser, maxBackfill int64, path string, offsetPath string, o
 	tail.offset = offset
 	tail.OffsetPath = offsetPath
 	tail.Parser = parser
-	tail.Watcher = tails.NewInotifyFileWatcher(path)
+	tail.Watcher = watch.NewInotifyFileWatcher(path)
 	tail.LoadOffset()
 	tail.maxBackfill = maxBackfill
 
@@ -133,7 +134,12 @@ func (tail *Tail) LoadOffset() {
 
 func (tail *Tail) StartWatching() {
 	go func() {
-		c := tail.Watcher.ChangeEvents()
+		fi, err := tail.Stat()
+		if err != nil {
+			logs.Error("Can't stat file: %s", err)
+			return
+		}
+		c := tail.Watcher.ChangeEvents(tomb.Tomb{}, fi)
 		for _, ok := <-c; ok; {
 			tail.Poll()
 		}
