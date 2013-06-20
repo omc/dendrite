@@ -27,6 +27,7 @@ type FieldTreatment int
 const (
 	Simple = iota
 	Tokens
+	Hash
 	Gauge
 	Metric
 	Counter
@@ -40,6 +41,7 @@ type FieldConfig struct {
 	Group     int
 	Format    string
 	Pattern   *regexp.Regexp
+	Salt      string
 }
 
 type SourceConfig struct {
@@ -228,6 +230,8 @@ func configFromMapping(mapping map[string]interface{}, hostname string) (*Config
 				}
 			}
 			logs.Info("found treatment %s", field.Treatment)
+
+			field.Salt, err = getString(fld, "salt")
 
 			field.Format, err = getString(fld, "format")
 
