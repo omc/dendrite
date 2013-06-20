@@ -7,6 +7,10 @@ sources:
         type: string
         treatment: tokenized
         pattern: [^&=]+
+      core:
+        type: string
+        treatment: hash
+        pattern: [^&=]+
       hits:
         type: int
       qtime: 

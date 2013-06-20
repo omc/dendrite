@@ -140,10 +140,16 @@ func (tail *Tail) StartWatching() {
 			return
 		}
 		c := tail.Watcher.ChangeEvents(tomb.Tomb{}, fi)
-		for _, ok := <-c; ok; {
-			tail.Poll()
-		}
+		go tail.pollChannel(c.Modified)
+		go tail.pollChannel(c.Truncated)
+		go tail.pollChannel(c.Deleted)
 	}()
+}
+
+func (tail *Tail) pollChannel(c chan bool) {
+	for _, ok := <-c; ok; {
+		tail.Poll()
+	}
 }
 
 func (tail *Tail) Poll() {
