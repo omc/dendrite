@@ -95,6 +95,26 @@ func TestBackfill(t *testing.T) {
 	}
 }
 
+func TestHash(t *testing.T) {
+	_init(t)
+	bash("cp ../../testdata/solr.txt tmp/solr.txt")
+	run("./dendrite", "-q", "0", "-d", "-f", "../../testdata/hash.yaml")
+	bytes, err := ioutil.ReadFile("tmp/out.json")
+	if err != nil {
+		t.Error(err)
+	}
+	str := string(bytes)
+	arr := strings.Split(strings.TrimSpace(str), "\n")
+	m := make(map[string]interface{})
+	err = json.Unmarshal([]byte(arr[0]), &m)
+	hashed := "FvYKVRKV_RWFNZLr3EkxPZWu7s0="
+
+	if m["core"] != hashed {
+		t.Error(m["core"], "not", hashed)
+	}
+
+}
+
 func TestGettingDataWithJunk(t *testing.T) {
 	_init(t)
 	bash("cp ../../testdata/junk.yaml tmp")

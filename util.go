@@ -142,6 +142,8 @@ func parseFieldTreatment(str string) (FieldTreatment, error) {
 		return Counter, nil
 	case "tokenized":
 		return Tokens, nil
+	case "hash":
+		return Hash, nil
 	}
 	return -1, fmt.Errorf("Can't recognize field treatment: %s", str)
 }
