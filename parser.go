@@ -1,6 +1,8 @@
 package dendrite
 
 import (
+	"crypto/sha1"
+	"encoding/base64"
 	"github.com/fizx/logs"
 	"regexp"
 	"strconv"
@@ -90,6 +92,8 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 			return
 		}
 
+		hasher := sha1.New()
+
 		out := make(map[string]Column)
 		out["_offset"] = Column{Integer, Simple, atomic.LoadInt64(counter)}
 		out["_file"] = Column{String, Simple, parser.file}
@@ -125,6 +129,12 @@ func (parser *RegexpParser) Consume(bytes []byte, counter *int64) {
 			case String:
 				if spec.Treatment == Tokens {
 					out[spec.Alias] = Column{Tokens, spec.Treatment, spec.Pattern.FindAllString(s, -1)}
+				} else if spec.Treatment == Hash {
+					hasher.Reset()
+					hasher.Write([]byte(spec.Salt))
+					hasher.Write([]byte(s))
+					sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+					out[spec.Alias] = Column{Tokens, spec.Treatment, sha}
 				} else {
 					out[spec.Alias] = Column{String, spec.Treatment, s}
 				}
