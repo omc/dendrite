@@ -1,0 +1,47 @@
+# -- log line --
+# INFO: [1234567898765] webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1
+# 
+# -- output --
+# {
+#   "line": "webapp=/solr path=/select params={start=0&q=*:*&wt=ruby&fq=type:User&rows=30} hits=3186235 status=0 QTime=1", 
+#   "severity": "INFO", 
+#   "core": "ZXw1Oq1iHrc1XfBEjil_rLhhIIk=", 
+#   "params": ["start", "0", "q", "*:*", "wt", "ruby", "fq", "type:User", "rows", "30"], 
+#   "hits": 3186235, 
+#   "status": 0,
+#   "qtime": 1
+# }
+#
+# -- log line --
+# INFO: [1234567898765] webapp=/solr path=/update params={wt=ruby} status=0 QTime=1
+#
+# -- output --
+# {
+#   "line": "webapp=/solr path=/update params={wt=ruby} status=0 QTime=1", 
+#   "severity": "INFO", 
+#   "core": "ZXw1Oq1iHrc1XfBEjil_rLhhIIk=", 
+#   "params": ["wt", "ruby"], 
+#   "status": 0,
+#   "qtime": 1
+# }
+#
+sources:
+  solr:
+    glob: /var/log/tomcat6/catalina*log
+    pattern: "(?P<severity>[A-Z]+): \\[(?P<core>\\w+)\\]\\s*(?P<line>.*?params=\\{(?P<params>[^}]*)\\}( hits=(?P<hits>[0-9]+))?.*status=(?P<status>[0-9]+).*QTime=(?P<qtime>[0-9]+)).*\\n"
+    fields: 
+      core:
+        type: string
+        treatment: hash
+        salt: hello
+      params:
+        type: string
+        treatment: tokenized
+        pattern: [^&=]+
+      hits:
+        type: int
+      qtime: 
+        type: int
+        treatment: metric
+      status:
+        type: int
