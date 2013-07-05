@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/url"
+	"os"
 	"testing"
 )
 
@@ -15,7 +16,9 @@ func check(t *testing.T, err error) {
 }
 
 func TestNewFileReadWriter(t *testing.T) {
-	bash("rm -f tmp.out")
+	if err := os.RemoveAll("tmp.out"); err != nil {
+		t.Fatal(err)
+	}
 	hai := []byte("hai world")
 	u, err := url.Parse("file+json://tmp.out")
 	check(t, err)
