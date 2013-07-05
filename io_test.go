@@ -43,7 +43,7 @@ func TestNewFileReadWriter(t *testing.T) {
 }
 
 func TestNewUDPReadWriter(t *testing.T) {
-	addr, err := net.ResolveUDPAddr("udp", "0.0.0.0:4009")
+	addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:4009")
 	check(t, err)
 
 	conn, err := net.ListenUDP("udp", addr)
@@ -85,7 +85,7 @@ func connHandler(t *testing.T, ln net.Listener, ch chan []byte) {
 
 func TestNewTCPReadWriter(t *testing.T) {
 	ch := make(chan []byte, 1)
-	conn, err := net.Listen("tcp", "0.0.0.0:4009")
+	conn, err := net.Listen("tcp", "127.0.0.1:4009")
 	go connHandler(t, conn, ch)
 
 	hai := []byte("hai world")
