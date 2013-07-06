@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/url"
+	"os"
 	"testing"
 )
 
@@ -15,7 +16,9 @@ func check(t *testing.T, err error) {
 }
 
 func TestNewFileReadWriter(t *testing.T) {
-	bash("rm -f tmp.out")
+	if err := os.RemoveAll("tmp.out"); err != nil {
+		t.Fatal(err)
+	}
 	hai := []byte("hai world")
 	u, err := url.Parse("file+json://tmp.out")
 	check(t, err)
@@ -40,7 +43,7 @@ func TestNewFileReadWriter(t *testing.T) {
 }
 
 func TestNewUDPReadWriter(t *testing.T) {
-	addr, err := net.ResolveUDPAddr("udp", "0.0.0.0:4009")
+	addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:4009")
 	check(t, err)
 
 	conn, err := net.ListenUDP("udp", addr)
@@ -82,7 +85,7 @@ func connHandler(t *testing.T, ln net.Listener, ch chan []byte) {
 
 func TestNewTCPReadWriter(t *testing.T) {
 	ch := make(chan []byte, 1)
-	conn, err := net.Listen("tcp", "0.0.0.0:4009")
+	conn, err := net.Listen("tcp", "127.0.0.1:4009")
 	go connHandler(t, conn, ch)
 
 	hai := []byte("hai world")

@@ -3,7 +3,6 @@ package dendrite
 import (
 	"github.com/fizx/logs"
 	"os"
-	"path"
 	"path/filepath"
 	"time"
 )
@@ -74,15 +73,15 @@ func (group *TailGroup) activate(match string) {
 				off := tail.Offset()
 				tail.SetOffset(0)
 				tail.WriteOffset()
-				base := path.Base(match)
-				offset := path.Join(group.OffsetDir, base+".ptr")
+				base := filepath.Base(match)
+				offset := filepath.Join(group.OffsetDir, base+".ptr")
 				tail = NewTail(group.NewParser(base), group.maxBackfill, match, offset, off)
 				group.Tails[match] = tail
 				return
 			}
 		}
-		base := path.Base(match)
-		offset := path.Join(group.OffsetDir, base+".ptr")
+		base := filepath.Base(match)
+		offset := filepath.Join(group.OffsetDir, base+".ptr")
 		tail = NewTail(group.NewParser(base), group.maxBackfill, match, offset, 0)
 		group.Tails[match] = tail
 
