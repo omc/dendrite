@@ -139,7 +139,7 @@ func (tail *Tail) StartWatching() {
 			logs.Error("Can't stat file: %s", err)
 			return
 		}
-		c := tail.Watcher.ChangeEvents(tomb.Tomb{}, fi)
+		c := tail.Watcher.ChangeEvents(&tomb.Tomb{}, fi)
 		go tail.pollChannel(c.Modified)
 		go tail.pollChannel(c.Truncated)
 		go tail.pollChannel(c.Deleted)
