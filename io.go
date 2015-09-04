@@ -2,7 +2,6 @@ package dendrite
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"net"
 	"net/url"
@@ -49,7 +48,7 @@ func NewReadWriter(u *url.URL) (io.ReadWriteCloser, error) {
 }
 
 func NewFileReadWriter(path string) (io.ReadWriteCloser, error) {
-	fmt.Println(path)
+	// fmt.Println(path)
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
 	if err != nil {
 		return nil, err
