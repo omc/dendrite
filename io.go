@@ -2,7 +2,6 @@ package dendrite
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"net"
 	"net/url"
