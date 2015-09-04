@@ -3,16 +3,17 @@ package dendrite
 import (
 	"bufio"
 	"fmt"
-	"github.com/ActiveState/tail/watch"
-	"github.com/fizx/logs"
 	"io"
-	"launchpad.net/tomb"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/ActiveState/tail/watch"
+	"github.com/fizx/logs"
+	tomb "gopkg.in/tomb.v1"
 )
 
 type TimeProvider interface {
@@ -44,7 +45,12 @@ func NewTail(parser Parser, maxBackfill int64, path string, offsetPath string, o
 	tail.offset = offset
 	tail.OffsetPath = offsetPath
 	tail.Parser = parser
-	tail.Watcher = watch.NewInotifyFileWatcher(path)
+	tracker := watch.NewInotifyTracker()
+	w, err := tracker.NewWatcher()
+	if err != nil {
+		return nil
+	}
+	tail.Watcher = watch.NewInotifyFileWatcher(path, w)
 	tail.LoadOffset()
 	tail.maxBackfill = maxBackfill
 
